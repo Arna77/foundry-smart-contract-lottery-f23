@@ -1,0 +1,14 @@
+{
+  "name": "property-nft-news",
+  "version": "1.0.0",
+  "description": "Malaysian real estate news aggregator for PropertyOwnershipNFT platform",
+  "scripts": {
+    "dev": "node api/server.js",
+    "fetch-news": "node api/newsScraper.js",
+    "start": "node api/server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "node-cron": "^3.0.3"
+  }
+}
