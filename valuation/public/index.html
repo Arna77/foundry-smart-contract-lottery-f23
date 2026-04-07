@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stellarise — Estimated Market Value Tool</title>
+  <style>
+    :root {
+      --primary: #1a56db;
+      --primary-dark: #1e3a8a;
+      --accent: #7c3aed;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+    header { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: white; padding: 2rem 1.5rem; text-align: center; }
+    header h1 { font-size: 1.75rem; margin-bottom: 0.25rem; }
+    header h1 span { color: #93c5fd; }
+    header p { opacity: 0.85; font-size: 0.95rem; max-width: 600px; margin: 0 auto; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+
+    /* ── Disclaimer ─── */
+    .disclaimer { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; font-size: 0.8rem; color: #92400e; }
+    .disclaimer strong { display: block; margin-bottom: 0.25rem; }
+
+    /* ── Form ─── */
+    .form-section { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1.5rem; }
+    .form-section h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary-dark); border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.3px; }
+    .form-group label .req { color: var(--danger); }
+    .form-group input, .form-group select { padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; transition: border-color 0.2s; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,86,219,0.1); }
+
+    .checkbox-row { display: flex; gap: 1.5rem; flex-wrap: wrap; padding: 0.5rem 0; }
+    .checkbox-row label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer; font-weight: 400; text-transform: none; color: var(--text); }
+
+    .btn { padding: 0.75rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary:disabled { background: var(--muted); cursor: not-allowed; }
+    .btn-secondary { background: white; color: var(--primary); border: 1px solid var(--primary); }
+    .btn-secondary:hover { background: #eff6ff; }
+
+    /* ── Results ─── */
+    #results { display: none; }
+
+    .result-hero { background: linear-gradient(135deg, #1e1b4b, #312e81); color: white; border-radius: 16px; padding: 2rem; text-align: center; margin-bottom: 1.5rem; }
+    .result-hero h2 { font-size: 1rem; opacity: 0.8; margin-bottom: 0.5rem; }
+    .result-hero .price-range { font-size: 2rem; font-weight: 700; }
+    .result-hero .price-mid { font-size: 1.1rem; opacity: 0.7; margin-top: 0.25rem; }
+
+    .listing-range { background: var(--card); border: 2px solid var(--success); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; text-align: center; }
+    .listing-range h3 { color: var(--success); font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .listing-range .range { font-size: 1.4rem; font-weight: 700; color: var(--text); }
+
+    .confidence-bar { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 1.25rem; margin-bottom: 1.5rem; }
+    .confidence-bar h3 { font-size: 0.9rem; margin-bottom: 0.75rem; }
+    .conf-meter { height: 12px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 0.5rem; }
+    .conf-fill { height: 100%; border-radius: 999px; transition: width 0.8s ease; }
+    .conf-fill.high { background: var(--success); }
+    .conf-fill.medium { background: var(--warning); }
+    .conf-fill.low { background: var(--danger); }
+    .conf-label { font-size: 0.85rem; color: var(--muted); }
+    .conf-reasons { list-style: none; margin-top: 0.75rem; }
+    .conf-reasons li { font-size: 0.8rem; color: var(--muted); padding: 0.2rem 0; padding-left: 1rem; position: relative; }
+    .conf-reasons li::before { content: "•"; position: absolute; left: 0; color: var(--primary); }
+
+    .comps-section { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 1.25rem; margin-bottom: 1.5rem; }
+    .comps-section h3 { font-size: 0.9rem; margin-bottom: 1rem; }
+    .comp-card { border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; }
+    .comp-card .comp-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+    .comp-card .comp-project { font-weight: 600; font-size: 0.9rem; }
+    .comp-card .comp-date { font-size: 0.75rem; color: var(--muted); }
+    .comp-card .comp-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.8rem; color: var(--muted); }
+    .comp-card .comp-stats span strong { color: var(--text); }
+    .comp-adjustments { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .adj-tag { font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 999px; background: #f0fdf4; color: #166534; }
+    .adj-tag.negative { background: #fef2f2; color: #991b1b; }
+
+    .cta-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .cta-row .btn { flex: 1; min-width: 200px; text-align: center; }
+
+    .basis-section { font-size: 0.8rem; color: var(--muted); text-align: center; margin-bottom: 1rem; }
+
+    .loading { display: none; text-align: center; padding: 2rem; }
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.75rem; }
+
+    @media (max-width: 640px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .result-hero .price-range { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Stellarise <span>Estimated Market Value</span></h1>
+  <p>Get an instant property estimate based on recent comparable transactions in Malaysia</p>
+</header>
+
+<div class="container">
+
+  <!-- Disclaimer -->
+  <div class="disclaimer">
+    <strong>Important Notice</strong>
+    This estimate is for indicative marketing use only. It is not a bank valuation, legal valuation, or certified valuation report.
+    Final market value may vary based on inspection, title details, property condition, and current demand.
+    For financing, legal proceedings, probate, or formal reporting, obtain a valuation from a registered valuer.
+  </div>
+
+  <!-- Form -->
+  <form id="valuationForm">
+
+    <div class="form-section">
+      <h2>Property Details</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Property Type <span class="req">*</span></label>
+          <select name="propertyType" required>
+            <option value="">Select...</option>
+            <option value="condominium">Condominium</option>
+            <option value="apartment">Apartment</option>
+            <option value="serviced_residence">Serviced Residence</option>
+            <option value="flat">Flat</option>
+            <option value="terrace">Terrace</option>
+            <option value="semi_detached">Semi-Detached</option>
+            <option value="bungalow">Bungalow</option>
+            <option value="townhouse">Townhouse</option>
+            <option value="cluster_house">Cluster House</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tenure <span class="req">*</span></label>
+          <select name="tenure" required>
+            <option value="freehold">Freehold</option>
+            <option value="leasehold">Leasehold</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Project / Taman Name</label>
+          <input type="text" name="projectName" placeholder="e.g. Pavilion Damansara Heights" />
+        </div>
+        <div class="form-group full">
+          <label>Address <span class="req">*</span></label>
+          <input type="text" name="address" placeholder="e.g. Jalan Damansara, Kuala Lumpur" required />
+        </div>
+        <div class="form-group">
+          <label>Postcode <span class="req">*</span></label>
+          <input type="text" name="postcode" placeholder="e.g. 50490" required />
+        </div>
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" name="city" placeholder="e.g. Kuala Lumpur" />
+        </div>
+        <div class="form-group">
+          <label>State <span class="req">*</span></label>
+          <select name="state" required>
+            <option value="">Select...</option>
+            <option value="Kuala Lumpur">Kuala Lumpur</option>
+            <option value="Selangor">Selangor</option>
+            <option value="Johor">Johor</option>
+            <option value="Penang">Penang</option>
+            <option value="Perak">Perak</option>
+            <option value="Kedah">Kedah</option>
+            <option value="Kelantan">Kelantan</option>
+            <option value="Melaka">Melaka</option>
+            <option value="Negeri Sembilan">Negeri Sembilan</option>
+            <option value="Pahang">Pahang</option>
+            <option value="Sabah">Sabah</option>
+            <option value="Sarawak">Sarawak</option>
+            <option value="Terengganu">Terengganu</option>
+            <option value="Perlis">Perlis</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Size & Layout</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Built-up Area (sqft) <span class="req">*</span></label>
+          <input type="number" name="builtUpSqft" placeholder="e.g. 1100" required min="100" />
+        </div>
+        <div class="form-group">
+          <label>Land Area (sqft) — Landed only</label>
+          <input type="number" name="landAreaSqft" placeholder="e.g. 1650" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Bedrooms</label>
+          <select name="bedrooms">
+            <option value="">—</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5+</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Bathrooms</label>
+          <select name="bathrooms">
+            <option value="">—</option>
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4+</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Car Parks</label>
+          <select name="carParks">
+            <option value="">—</option>
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3+</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Floor Level (Strata only)</label>
+          <input type="number" name="floorLevel" placeholder="e.g. 18" min="1" />
+        </div>
+        <div class="form-group">
+          <label>Year Completed</label>
+          <input type="number" name="yearCompleted" placeholder="e.g. 2020" min="1960" max="2027" />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Condition & Features</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Renovation Level</label>
+          <select name="renovationLevel">
+            <option value="original">Original</option>
+            <option value="light">Light Reno</option>
+            <option value="moderate">Moderate Reno</option>
+            <option value="extensive">Extensive Reno</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Furnishing</label>
+          <select name="furnishingLevel">
+            <option value="unfurnished">Unfurnished</option>
+            <option value="partial">Partially Furnished</option>
+            <option value="full">Fully Furnished</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>View Quality</label>
+          <select name="viewQuality">
+            <option value="poor">Poor / Blocked</option>
+            <option value="normal" selected>Normal</option>
+            <option value="open">Open View</option>
+            <option value="premium">Premium (Sea/KLCC/Park)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Facing</label>
+          <select name="facing">
+            <option value="">—</option>
+            <option value="North">North</option>
+            <option value="South">South</option>
+            <option value="East">East</option>
+            <option value="West">West</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group full" style="margin-top: 1rem;">
+        <label>Additional Features</label>
+        <div class="checkbox-row">
+          <label><input type="checkbox" name="cornerFlag" /> Corner Unit / Lot</label>
+          <label><input type="checkbox" name="endLotFlag" /> End Lot</label>
+          <label><input type="checkbox" name="gatedGuarded" /> Gated & Guarded</label>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" id="submitBtn">Get Estimated Market Value</button>
+  </form>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Analyzing comparable transactions...</p>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+    <!-- Filled by JS -->
+  </div>
+
+</div>
+
+<footer>
+  Stellarise.io &copy; 2026 &mdash; Estimated Market Value Tool &mdash; Based on Recent Comparable Transactions
+  <br />Data sources: NAPIC / JPPH, iProperty.com.my, The Edge Property, PropertyGuru
+</footer>
+
+<script>
+const API = "/api";
+
+document.getElementById("valuationForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const btn = document.getElementById("submitBtn");
+  const loading = document.getElementById("loading");
+  const resultsDiv = document.getElementById("results");
+
+  btn.disabled = true;
+  loading.style.display = "block";
+  resultsDiv.style.display = "none";
+
+  const data = {
+    propertyType: form.propertyType.value,
+    tenure: form.tenure.value,
+    projectName: form.projectName.value || null,
+    address: form.address.value,
+    postcode: form.postcode.value,
+    city: form.city.value || null,
+    state: form.state.value,
+    builtUpSqft: Number(form.builtUpSqft.value),
+    landAreaSqft: form.landAreaSqft.value ? Number(form.landAreaSqft.value) : null,
+    bedrooms: form.bedrooms.value ? Number(form.bedrooms.value) : null,
+    bathrooms: form.bathrooms.value ? Number(form.bathrooms.value) : null,
+    carParks: form.carParks.value ? Number(form.carParks.value) : null,
+    floorLevel: form.floorLevel.value ? Number(form.floorLevel.value) : null,
+    yearCompleted: form.yearCompleted.value ? Number(form.yearCompleted.value) : null,
+    renovationLevel: form.renovationLevel.value,
+    furnishingLevel: form.furnishingLevel.value,
+    viewQuality: form.viewQuality.value,
+    cornerFlag: form.cornerFlag.checked,
+    endLotFlag: form.endLotFlag.checked,
+    gatedGuarded: form.gatedGuarded.checked,
+  };
+
+  try {
+    const res = await fetch(`${API}/valuation/estimate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    renderResults(result, data);
+  } catch (err) {
+    resultsDiv.innerHTML = `<div class="disclaimer">Error: ${err.message}. Please try again.</div>`;
+    resultsDiv.style.display = "block";
+  } finally {
+    btn.disabled = false;
+    loading.style.display = "none";
+  }
+});
+
+function fmt(n) {
+  return "RM " + Number(n).toLocaleString("en-MY");
+}
+
+function renderResults(r, input) {
+  const resultsDiv = document.getElementById("results");
+
+  if (!r.marketValue) {
+    resultsDiv.innerHTML = `
+      <div class="result-hero" style="background: linear-gradient(135deg, #7f1d1d, #991b1b);">
+        <h2>Unable to Estimate</h2>
+        <p style="opacity:0.8">${r.confidence.reasons.join(". ")}</p>
+        <p style="margin-top:1rem; opacity:0.7">Please request a registered valuer review for this property.</p>
+      </div>
+      <div class="cta-row">
+        <button class="btn btn-primary" onclick="requestReview('${r.estimateId}', 'valuer')">Request Registered Valuer</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('results').style.display='none'; window.scrollTo(0,0);">Try Another Property</button>
+      </div>`;
+    resultsDiv.style.display = "block";
+    return;
+  }
+
+  const confClass = r.confidence.band;
+
+  resultsDiv.innerHTML = `
+    <!-- Hero: Market Value Range -->
+    <div class="result-hero">
+      <h2>Estimated Market Value</h2>
+      <div class="price-range">${fmt(r.marketValue.low)} — ${fmt(r.marketValue.high)}</div>
+      <div class="price-mid">Mid estimate: ${fmt(r.marketValue.mid)}</div>
+    </div>
+
+    <!-- Suggested Listing Range -->
+    <div class="listing-range">
+      <h3>Suggested Listing Range</h3>
+      <div class="range">${fmt(r.suggestedListing.low)} — ${fmt(r.suggestedListing.high)}</div>
+    </div>
+
+    <!-- Confidence Score -->
+    <div class="confidence-bar">
+      <h3>Confidence Score: ${r.confidence.score}/100 (${r.confidence.band.toUpperCase()})</h3>
+      <div class="conf-meter"><div class="conf-fill ${confClass}" style="width: ${r.confidence.score}%"></div></div>
+      <ul class="conf-reasons">
+        ${r.confidence.reasons.map((r) => `<li>${r}</li>`).join("")}
+      </ul>
+    </div>
+
+    <!-- Pricing Basis -->
+    <div class="basis-section">
+      Based on <strong>${r.pricingBasis.compCount} comparable transactions</strong> &mdash;
+      Weighted PSF: <strong>RM ${r.pricingBasis.weightedPsf}/sqft</strong>
+    </div>
+
+    <!-- Comparables Used -->
+    <div class="comps-section">
+      <h3>Comparable Transactions Used</h3>
+      ${r.comparables.map((c) => `
+        <div class="comp-card">
+          <div class="comp-header">
+            <span class="comp-project">${c.projectName || "Unknown Project"}</span>
+            <span class="comp-date">${new Date(c.transactionDate).toLocaleDateString("en-MY", { day: "numeric", month: "short", year: "numeric" })}</span>
+          </div>
+          <div class="comp-stats">
+            <span>Price: <strong>${fmt(c.price)}</strong></span>
+            <span>Size: <strong>${c.builtUpSqft} sqft</strong></span>
+            <span>PSF: <strong>RM ${c.psf}</strong></span>
+            <span>Adj PSF: <strong>RM ${c.adjustedPsf}</strong></span>
+            <span>Match: <strong>${Math.round(c.similarityScore * 100)}%</strong></span>
+          </div>
+          ${c.adjustments.length ? `
+            <div class="comp-adjustments">
+              ${c.adjustments.map((a) => `<span class="adj-tag ${a.includes("-") ? "negative" : ""}">${a}</span>`).join("")}
+            </div>` : ""}
+        </div>`).join("")}
+    </div>
+
+    <!-- CTAs -->
+    <div class="cta-row">
+      <button class="btn btn-primary" onclick="alert('Coming soon — List your property on Stellarise.io')">List Property Now</button>
+      <button class="btn btn-secondary" onclick="requestReview('${r.estimateId}', 'agent')">Request Agent Review</button>
+      <button class="btn btn-secondary" onclick="requestReview('${r.estimateId}', 'valuer')">Request Registered Valuer</button>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+      <strong>${r.disclaimer}</strong>
+      For financing, legal proceedings, probate, or formal reporting, please obtain a valuation from a registered valuer.
+      Method version: ${r.methodVersion}
+    </div>
+  `;
+
+  resultsDiv.style.display = "block";
+  resultsDiv.scrollIntoView({ behavior: "smooth" });
+}
+
+async function requestReview(estimateId, reviewType) {
+  try {
+    const res = await fetch(`${API}/valuation/review-request`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ estimateId, reviewType }),
+    });
+    const data = await res.json();
+    alert(`Review request submitted (${reviewType}). Reference: ${data.id}. We will contact you soon.`);
+  } catch {
+    alert("Error submitting review request. Please try again.");
+  }
+}
+</script>
+</body>
+</html>
