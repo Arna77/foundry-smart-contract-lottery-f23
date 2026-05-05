@@ -433,7 +433,7 @@
 <!-- ═══════ HOW IT WORKS ═══════ -->
 <div class="section">
   <h2 class="section-title">How it works</h2>
-  <p class="section-sub">Five simple steps to your verified property listing</p>
+  <p class="section-sub">Five simple steps — including a free instant valuation</p>
   <div class="steps">
     <div class="step">
       <div class="step-num">1</div>
@@ -443,27 +443,27 @@
     </div>
     <div class="step">
       <div class="step-num">2</div>
+      <div class="step-icon">💎</div>
+      <h4>Free Valuation</h4>
+      <p>Get an instant market estimate for your property — free, no commitment.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
       <div class="step-icon">📄</div>
       <h4>Upload Title Deed</h4>
       <p>Submit your Geran and documents securely through our portal.</p>
     </div>
     <div class="step">
-      <div class="step-num">3</div>
+      <div class="step-num">4</div>
       <div class="step-icon">💳</div>
       <h4>Choose Plan</h4>
       <p>Pick a plan for direct owners or agents. Pay via secure checkout.</p>
     </div>
     <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-icon">🏆</div>
-      <h4>Receive Your NFT</h4>
-      <p>Your property NFT is minted on Polygon once your title is verified.</p>
-    </div>
-    <div class="step">
       <div class="step-num">5</div>
-      <div class="step-icon">🏠</div>
-      <h4>Add Your Listing</h4>
-      <p>Post your property with the Ownership Verified badge — stand out to buyers.</p>
+      <div class="step-icon">🏆</div>
+      <h4>Verified &amp; List</h4>
+      <p>Your NFT is minted on Polygon — post your listing with the Ownership Verified badge.</p>
     </div>
   </div>
 </div>
@@ -588,8 +588,8 @@
       </div>
     </div>
     <div class="form-grid-2">
-      <div class="form-group"><label>Built-up Area (sq ft) <span class="req">*</span></label><input id="val-sqft" type="number" placeholder="e.g. 1200" min="100" max="50000" /></div>
-      <div class="form-group"><label>Bedrooms</label><input id="val-beds" type="number" placeholder="e.g. 3" min="0" max="20" /></div>
+      <div class="form-group"><label>Built-up Area (sq ft) <span class="req">*</span></label><input id="val-sqft" type="text" inputmode="numeric" placeholder="e.g. 1200" /></div>
+      <div class="form-group"><label>Bedrooms</label><input id="val-beds" type="text" inputmode="numeric" placeholder="e.g. 3" /></div>
     </div>
 
     <button class="btn-primary" id="val-btn" onclick="runValuation()">Get Instant Estimate &rarr;</button>
@@ -979,11 +979,15 @@ async function runValuation() {
   const address = document.getElementById('val-address').value.trim();
   const postcode= document.getElementById('val-postcode').value.trim();
   const state   = document.getElementById('val-state').value;
-  const sqft    = document.getElementById('val-sqft').value;
+  const sqftRaw = document.getElementById('val-sqft').value.replace(/,/g, '').trim();
+  const sqft    = parseInt(sqftRaw, 10);
 
-  if (!type || !tenure || !address || !postcode || !state || !sqft) {
-    alert('Please fill in all required fields (marked *).'); return;
-  }
+  if (!type)    { alert('Please select a Property Type.'); return; }
+  if (!tenure)  { alert('Please select Tenure.'); return; }
+  if (!address) { alert('Please enter the Address.'); return; }
+  if (!postcode){ alert('Please enter the Postcode.'); return; }
+  if (!state)   { alert('Please select a State.'); return; }
+  if (!sqft || sqft < 100) { alert('Please enter a valid Built-up Area (min 100 sq ft).'); return; }
 
   const btn = document.getElementById('val-btn');
   btn.disabled = true; btn.textContent = 'Estimating…';
@@ -1000,8 +1004,8 @@ async function runValuation() {
         address:       address,
         postcode:      postcode,
         state:         state,
-        builtUpSqft:   Number(sqft),
-        bedrooms:      document.getElementById('val-beds').value || null,
+        builtUpSqft:   sqft,
+        bedrooms:      parseInt(document.getElementById('val-beds').value) || null,
       })
     });
     const r = await res.json();
