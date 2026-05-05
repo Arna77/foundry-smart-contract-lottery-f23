@@ -489,10 +489,10 @@
   <!-- PROGRESS BAR -->
   <div class="progress-steps" id="progressBar">
     <div class="prog-step" id="ps1"><div class="prog-circle">1</div><div class="prog-label">Account</div></div>
-    <div class="prog-step" id="ps2"><div class="prog-circle">2</div><div class="prog-label">Docs</div></div>
-    <div class="prog-step" id="ps3"><div class="prog-circle">3</div><div class="prog-label">Plan</div></div>
-    <div class="prog-step" id="ps4"><div class="prog-circle">4</div><div class="prog-label">NFT</div></div>
-    <div class="prog-step" id="ps5"><div class="prog-circle">5</div><div class="prog-label">Listing</div></div>
+    <div class="prog-step" id="ps2"><div class="prog-circle">2</div><div class="prog-label">Valuation</div></div>
+    <div class="prog-step" id="ps3"><div class="prog-circle">3</div><div class="prog-label">Docs</div></div>
+    <div class="prog-step" id="ps4"><div class="prog-circle">4</div><div class="prog-label">Plan</div></div>
+    <div class="prog-step" id="ps5"><div class="prog-circle">5</div><div class="prog-label">Verified</div></div>
   </div>
 
   <!-- ── Step 0: Choose path ── -->
@@ -542,9 +542,75 @@
     <button class="btn-outline" onclick="submitAccount()">Sign In</button>
   </div>
 
-  <!-- ── Step 2: Upload docs ── -->
-  <div class="modal-step" id="stepDocs">
+  <!-- ── Step 2: Instant Valuation ── -->
+  <div class="modal-step" id="stepValuation">
     <button class="modal-back" onclick="show('stepAccount');setProgress(1);">&#8592; Back</button>
+    <h2>Instant Property Valuation</h2>
+    <p class="modal-sub">Enter your property details to get a free market estimate — powered by Stellarise AVM.</p>
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label>Property Type <span class="req">*</span></label>
+        <select id="val-type">
+          <option value="">Select...</option>
+          <option value="condominium">Condominium</option>
+          <option value="serviced_residence">Serviced Residence</option>
+          <option value="apartment">Apartment</option>
+          <option value="flat">Flat</option>
+          <option value="terrace">Terrace</option>
+          <option value="semi_detached">Semi-Detached</option>
+          <option value="bungalow">Bungalow</option>
+          <option value="townhouse">Townhouse</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tenure <span class="req">*</span></label>
+        <select id="val-tenure">
+          <option value="">Select...</option>
+          <option value="freehold">Freehold</option>
+          <option value="leasehold">Leasehold</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Project / Building Name</label><input id="val-project" placeholder="e.g. St Mary Residences" /></div>
+    <div class="form-group"><label>Address <span class="req">*</span></label><input id="val-address" placeholder="e.g. Jalan Stonor, KLCC" /></div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>Postcode <span class="req">*</span></label><input id="val-postcode" placeholder="e.g. 50450" maxlength="10" /></div>
+      <div class="form-group">
+        <label>State <span class="req">*</span></label>
+        <select id="val-state">
+          <option value="">Select...</option>
+          <option>Kuala Lumpur</option><option>Selangor</option><option>Johor</option>
+          <option>Penang</option><option>Perak</option><option>Kedah</option>
+          <option>Kelantan</option><option>Melaka</option><option>Negeri Sembilan</option>
+          <option>Pahang</option><option>Sabah</option><option>Sarawak</option>
+          <option>Terengganu</option><option>Perlis</option><option>Putrajaya</option><option>Labuan</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>Built-up Area (sq ft) <span class="req">*</span></label><input id="val-sqft" type="number" placeholder="e.g. 1200" min="100" max="50000" /></div>
+      <div class="form-group"><label>Bedrooms</label><input id="val-beds" type="number" placeholder="e.g. 3" min="0" max="20" /></div>
+    </div>
+
+    <button class="btn-primary" id="val-btn" onclick="runValuation()">Get Instant Estimate &rarr;</button>
+
+    <!-- Result card -->
+    <div id="val-result" style="display:none;margin-top:1.25rem;">
+      <div id="val-estimate-box" style="border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;background:linear-gradient(135deg,var(--blue-dark),var(--blue-mid));color:#fff;">
+        <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;opacity:0.8;margin-bottom:0.4rem;">Estimated Market Value</div>
+        <div id="val-range" style="font-family:'Lato',sans-serif;font-weight:900;font-size:1.5rem;margin-bottom:0.2rem;"></div>
+        <div id="val-mid-label" style="font-size:0.82rem;opacity:0.85;margin-bottom:0.75rem;"></div>
+        <div id="val-reasons" style="font-size:0.76rem;opacity:0.8;line-height:1.6;"></div>
+      </div>
+      <div id="val-nodata" style="display:none;background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:10px;padding:0.85rem 1rem;font-size:0.82rem;color:var(--warn-text);margin-bottom:1rem;"></div>
+      <button class="btn-primary" onclick="proceedToDocs()">Continue — Upload Title Deed &rarr;</button>
+    </div>
+    <button class="btn-outline" style="margin-top:0.75rem;" onclick="skipValuation()">Skip for now &rarr;</button>
+  </div>
+
+  <!-- ── Step 3: Upload docs ── -->
+  <div class="modal-step" id="stepDocs">
+    <button class="modal-back" onclick="show('stepValuation');setProgress(2);">&#8592; Back</button>
     <h2>Upload your title deed</h2>
     <p class="modal-sub">Our team verifies your documents within 1–3 business days.</p>
     <div class="form-group"><label>Property Title Number (Hakmilik / Geran)</label><input id="titleNum" placeholder="e.g. HS(D) 12345, PT 678" /></div>
@@ -585,9 +651,9 @@
     <button class="btn-primary" style="margin-top:1.25rem;" onclick="submitDocs()">Continue to Plan Selection</button>
   </div>
 
-  <!-- ── Step 3: Choose plan ── -->
+  <!-- ── Step 4: Choose plan ── -->
   <div class="modal-step" id="stepPlan">
-    <button class="modal-back" onclick="show('stepDocs');setProgress(2);">&#8592; Back</button>
+    <button class="modal-back" onclick="show('stepDocs');setProgress(3);">&#8592; Back</button>
     <h2>Choose your plan</h2>
     <p class="modal-sub">Select the subscription that fits you. Payment is processed securely via WooCommerce.</p>
     <div class="plans-grid">
@@ -747,7 +813,7 @@ function submitAccount() {
   if (pass.length < 8)        { alert('Password must be at least 8 characters.'); return; }
 
   userEmail = email; // store sanitised value only — never written to localStorage
-  show('stepDocs'); setProgress(2);
+  show('stepValuation'); setProgress(2);
 }
 
 /* ── Wallet — with chain verification ── */
@@ -828,7 +894,7 @@ function submitDocs() {
     );
     if (!ok) return;
   }
-  show('stepPlan'); setProgress(3);
+  show('stepPlan'); setProgress(4);
 }
 
 /* ── Plan — whitelist validated ── */
@@ -871,7 +937,7 @@ function submitPayment() {
   if (walletAddress) {
     setText('walletConfirm', 'NFT destination: ' + walletAddress.slice(0,6) + '...' + walletAddress.slice(-4));
   }
-  show('stepSuccess'); setProgress(4);
+  show('stepSuccess'); setProgress(5);
   submitting = false;
 
   // Production: redirect to WooCommerce checkout
@@ -903,6 +969,82 @@ function showFiles(inputId, listId) {
     list.appendChild(div);
   }
 }
+
+/* ── Step 2: Valuation ── */
+const VALUATION_API = 'https://valuation.stellarise.io/api/valuation/estimate';
+
+async function runValuation() {
+  const type    = document.getElementById('val-type').value;
+  const tenure  = document.getElementById('val-tenure').value;
+  const address = document.getElementById('val-address').value.trim();
+  const postcode= document.getElementById('val-postcode').value.trim();
+  const state   = document.getElementById('val-state').value;
+  const sqft    = document.getElementById('val-sqft').value;
+
+  if (!type || !tenure || !address || !postcode || !state || !sqft) {
+    alert('Please fill in all required fields (marked *).'); return;
+  }
+
+  const btn = document.getElementById('val-btn');
+  btn.disabled = true; btn.textContent = 'Estimating…';
+  document.getElementById('val-result').style.display = 'none';
+
+  try {
+    const res = await fetch(VALUATION_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        propertyType:  type,
+        tenure:        tenure,
+        projectName:   document.getElementById('val-project').value.trim() || null,
+        address:       address,
+        postcode:      postcode,
+        state:         state,
+        builtUpSqft:   Number(sqft),
+        bedrooms:      document.getElementById('val-beds').value || null,
+      })
+    });
+    const r = await res.json();
+    showValResult(r);
+    // Store for reference in docs step
+    window._valuationResult = r;
+    window._propertyData    = { type, tenure, address, postcode, state, sqft };
+  } catch(e) {
+    alert('Unable to reach valuation service. Please try again or skip.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Get Instant Estimate →';
+  }
+}
+
+function fmt(n) { return 'RM ' + Number(n).toLocaleString('en-MY'); }
+
+function showValResult(r) {
+  const box     = document.getElementById('val-estimate-box');
+  const nodata  = document.getElementById('val-nodata');
+  const result  = document.getElementById('val-result');
+
+  if (r.marketValue) {
+    box.style.display = 'block';
+    nodata.style.display = 'none';
+    document.getElementById('val-range').textContent =
+      fmt(r.marketValue.low) + ' — ' + fmt(r.marketValue.high);
+    document.getElementById('val-mid-label').textContent =
+      'Mid estimate: ' + fmt(r.marketValue.mid) +
+      '  ·  ' + (r.pricingBasis?.compCount || 0) + ' comparable transactions';
+    const band = r.confidence?.band || '';
+    const bandLabel = { high: '🟢 High confidence', medium: '🟡 Medium confidence', low: '🔴 Low confidence' }[band] || '';
+    document.getElementById('val-reasons').textContent =
+      bandLabel + (r.confidence?.reasons?.[0] ? '  ·  ' + r.confidence.reasons[0] : '');
+  } else {
+    box.style.display = 'none';
+    nodata.style.display = 'block';
+    nodata.textContent = '⚠️ Not enough comparable data for this area. You can still proceed — our team will assess your property during verification.';
+  }
+  result.style.display = 'block';
+}
+
+function proceedToDocs() { show('stepDocs'); setProgress(3); }
+function skipValuation()  { show('stepDocs'); setProgress(3); }
 
 /* ── localStorage hygiene check (runs once on load) ── */
 (function auditStorage() {
