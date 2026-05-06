@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -122,12 +123,12 @@ contract PropertyOwnershipNFT is ERC721, ERC721URIStorage, Ownable {
     }
 
     /// @dev Disable approve — no one should be able to approve marketplace operators.
-    function approve(address, uint256) public pure override(ERC721) {
+    function approve(address, uint256) public pure override(ERC721, IERC721) {
         revert PropertyOwnershipNFT__TransferNotAllowed();
     }
 
     /// @dev Disable setApprovalForAll.
-    function setApprovalForAll(address, bool) public pure override(ERC721) {
+    function setApprovalForAll(address, bool) public pure override(ERC721, IERC721) {
         revert PropertyOwnershipNFT__TransferNotAllowed();
     }
 
