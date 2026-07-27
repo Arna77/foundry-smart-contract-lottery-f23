@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stellarise — Estimated Market Value Tool</title>
+  <title>PropertyNFT Malaysia — Real Estate News &amp; Valuation Tool</title>
   <style>
     :root {
       --primary: #1a56db;
@@ -17,13 +17,17 @@
       --text: #1e293b;
       --muted: #64748b;
       --border: #e2e8f0;
+      /* Stellarise brand colors */
+      --stellarise-gradient: linear-gradient(135deg, #19e345 0%, #50cdd9 35%, #1f7bc6 65%, #002d75 100%);
+      --tag-bg: #eff6ff;
+      --tag-text: #1d4ed8;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
 
-    header { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: white; padding: 2rem 1.5rem; text-align: center; }
+    header { background: var(--stellarise-gradient); color: white; padding: 2rem 1.5rem; text-align: center; }
     header h1 { font-size: 1.75rem; margin-bottom: 0.25rem; }
-    header h1 span { color: #93c5fd; }
+    header h1 span { color: #fff; font-weight: 300; }
     header p { opacity: 0.85; font-size: 0.95rem; max-width: 600px; margin: 0 auto; }
 
     .container { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
@@ -34,39 +38,126 @@
 
     /* ── Form ─── */
     .form-section { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1.5rem; }
-    .form-section h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary-dark); border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
+    .form-section h2 { font-size: 1.1rem; margin-bottom: 1rem; color: #002d75; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-group { display: flex; flex-direction: column; }
     .form-group.full { grid-column: 1 / -1; }
     .form-group label { font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.3px; }
     .form-group label .req { color: var(--danger); }
     .form-group input, .form-group select { padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; transition: border-color 0.2s; }
-    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,86,219,0.1); }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #1a5aed; box-shadow: 0 0 0 3px rgba(26,90,237,0.1); }
 
     .checkbox-row { display: flex; gap: 1.5rem; flex-wrap: wrap; padding: 0.5rem 0; }
     .checkbox-row label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer; font-weight: 400; text-transform: none; color: var(--text); }
 
     .btn { padding: 0.75rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .btn-primary { background: var(--primary); color: white; width: 100%; }
-    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary { background: #1a5aed; color: white; width: 100%; }
+    .btn-primary:hover { background: #002d75; }
     .btn-primary:disabled { background: var(--muted); cursor: not-allowed; }
-    .btn-secondary { background: white; color: var(--primary); border: 1px solid var(--primary); }
+    .btn-secondary { background: white; color: #1a5aed; border: 1px solid #1a5aed; }
     .btn-secondary:hover { background: #eff6ff; }
 
     /* ── Results ─── */
-    #results { display: none; }
+    #results { display: none; margin-top: 2rem; }
 
-    .result-hero { background: linear-gradient(135deg, #1e1b4b, #312e81); color: white; border-radius: 16px; padding: 2rem; text-align: center; margin-bottom: 1.5rem; }
-    .result-hero h2 { font-size: 1rem; opacity: 0.8; margin-bottom: 0.5rem; }
-    .result-hero .price-range { font-size: 2rem; font-weight: 700; }
-    .result-hero .price-mid { font-size: 1.1rem; opacity: 0.7; margin-top: 0.25rem; }
+    /* ── Page Layout ─── */
+    .page-body { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; display: grid; grid-template-columns: 1fr 340px; gap: 1.75rem; align-items: start; }
+    @media(max-width: 960px) { .page-body { grid-template-columns: 1fr; } }
+
+    /* ── Main Content ─── */
+    .main-content { min-width: 0; }
+    .form-card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden; }
+    .form-card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); background: #f8fafc; }
+    .form-card-header h2 { font-weight: 900; font-size: 1.2rem; color: #002d75; }
+
+    /* ── Sidebar ─── */
+    .sidebar { display: flex; flex-direction: column; gap: 1rem; }
+    .side-card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+    .side-card-header { background: #002d75; color: #ffffff; padding: 0.9rem 1.2rem; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; }
+    
+    /* ── Verify CTA Card ─── */
+    .verify-card { background: var(--stellarise-gradient); border-radius: 16px; padding: 1.5rem; color: #ffffff; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .verify-card h3 { font-weight: 900; font-size: 1.1rem; margin-bottom: 0.5rem; color: #ffffff; }
+    .verify-card p { font-size: 0.82rem; opacity: 0.92; margin-bottom: 1rem; line-height: 1.5; color: #ffffff; }
+    .btn-verify { background: #ffffff; color: #1a5aed; border: none; border-radius: 9999px; padding: 0.65rem 1.5rem; font-weight: 700; font-size: 0.85rem; cursor: pointer; text-decoration: none; display: inline-block; transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-verify:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); background: #ffffff; }
+
+    /* ── Market Stats in Sidebar ─── */
+    .stats-grid-sidebar { display: grid; grid-template-columns: 1fr 1fr; }
+    .stat-item { padding: 1rem; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); text-align: center; }
+    .stat-item:nth-child(even) { border-right: none; }
+    .stat-item:nth-last-child(-n+2) { border-bottom: none; }
+    .stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+    .stat-value-sidebar { font-weight: 900; font-size: 1.1rem; color: #002d75; }
+    .stat-value-sidebar.green { color: var(--success); }
+
+    /* ── News in Sidebar ─── */
+    .news-list { padding: 0; }
+    .news-item { padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+    .news-item:last-child { border-bottom: none; }
+    .news-item:hover { background: #f8fbff; }
+    .news-cat { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.15rem 0.5rem; border-radius: 999px; margin-bottom: 0.4rem; display: inline-block; background: var(--tag-bg); color: var(--tag-text); }
+    .news-title { font-size: 0.82rem; font-weight: 600; color: #002d75; line-height: 1.4; margin-bottom: 0.25rem; }
+    .news-date { font-size: 0.7rem; color: var(--muted); }
+    
+    /* ── Live Indicator ─── */
+    .live-indicator { display: inline-flex; align-items: center; gap: 0.4rem; margin-left: auto; }
+    .live-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; animation: pulse 1.5s infinite; }
+    .live-text { font-size: 0.75rem; font-weight: 700; color: #22c55e; text-transform: uppercase; letter-spacing: 0.05em; }
+    @keyframes pulse { 
+      0%, 100% { opacity: 1; transform: scale(1); } 
+      50% { opacity: 0.6; transform: scale(1.2); } 
+    }
+
+    /* ── Navigation Bar ─── */
+    nav { background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .logo-wrap { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+    .logo-mark { height: 38px; width: auto; }
+    .logo-text { font-weight: 900; font-size: 1.4rem; background: var(--stellarise-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .nav-links { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-links a { color: #4d8ef0; text-decoration: none; font-size: 0.88rem; font-weight: 600; transition: color 0.2s; }
+    .nav-links a:hover { color: #002d75; }
+    .nav-links a.active { color: #1a5aed; border-bottom: 2px solid #1a5aed; padding-bottom: 2px; }
+    .nav-btn { background: #1a5aed; color: #ffffff; border: none; border-radius: 9999px; padding: 0.45rem 1.1rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; text-decoration: none; transition: background 0.2s; }
+    .nav-btn:hover { background: #002d75; }
+    .hamburger { display: none; }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex !important; }
+      .nav-links.active {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 64px;
+        left: 0;
+        right: 0;
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+        padding: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        gap: 0.75rem;
+      }
+    }
+
+    .heroes-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    @media (max-width: 640px) { .heroes-row { grid-template-columns: 1fr; } }
+
+    .result-hero { color: white; border-radius: 16px; padding: 2rem; text-align: center; }
+    .result-hero.sale { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); }
+    .result-hero.rental { background: linear-gradient(135deg, #1f7bc6, #50cdd9); }
+    .result-hero h2 { font-size: 0.9rem; opacity: 0.8; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .result-hero .price-range { font-size: 1.6rem; font-weight: 700; line-height: 1.2; }
+    .result-hero .price-mid { font-size: 0.9rem; opacity: 0.7; margin-top: 0.25rem; }
+    .result-hero .hero-badge { display: inline-block; font-size: 0.7rem; padding: 0.2rem 0.6rem; background: rgba(255,255,255,0.18); border-radius: 999px; margin-top: 0.75rem; }
+    .result-hero .hero-sub { font-size: 0.78rem; opacity: 0.65; margin-top: 0.35rem; }
 
     .listing-range { background: var(--card); border: 2px solid var(--success); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; text-align: center; }
     .listing-range h3 { color: var(--success); font-size: 0.9rem; margin-bottom: 0.5rem; }
     .listing-range .range { font-size: 1.4rem; font-weight: 700; color: var(--text); }
 
     .confidence-bar { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 1.25rem; margin-bottom: 1.5rem; }
-    .confidence-bar h3 { font-size: 0.9rem; margin-bottom: 0.75rem; }
+    .confidence-bar h3 { font-size: 0.9rem; margin-bottom: 0.75rem; color: #002d75; }
     .conf-meter { height: 12px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 0.5rem; }
     .conf-fill { height: 100%; border-radius: 999px; transition: width 0.8s ease; }
     .conf-fill.high { background: var(--success); }
@@ -75,13 +166,13 @@
     .conf-label { font-size: 0.85rem; color: var(--muted); }
     .conf-reasons { list-style: none; margin-top: 0.75rem; }
     .conf-reasons li { font-size: 0.8rem; color: var(--muted); padding: 0.2rem 0; padding-left: 1rem; position: relative; }
-    .conf-reasons li::before { content: "•"; position: absolute; left: 0; color: var(--primary); }
+    .conf-reasons li::before { content: "•"; position: absolute; left: 0; color: #1a5aed; }
 
     .comps-section { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 1.25rem; margin-bottom: 1.5rem; }
-    .comps-section h3 { font-size: 0.9rem; margin-bottom: 1rem; }
+    .comps-section h3 { font-size: 0.9rem; margin-bottom: 1rem; color: #002d75; }
     .comp-card { border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; }
     .comp-card .comp-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
-    .comp-card .comp-project { font-weight: 600; font-size: 0.9rem; }
+    .comp-card .comp-project { font-weight: 600; font-size: 0.9rem; color: #002d75; }
     .comp-card .comp-date { font-size: 0.75rem; color: var(--muted); }
     .comp-card .comp-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.8rem; color: var(--muted); }
     .comp-card .comp-stats span strong { color: var(--text); }
@@ -95,36 +186,218 @@
     .basis-section { font-size: 0.8rem; color: var(--muted); text-align: center; margin-bottom: 1rem; }
 
     .loading { display: none; text-align: center; padding: 2rem; }
-    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: #1a5aed; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.75rem; }
+    footer { background: #002d75; color: rgba(255,255,255,0.7); text-align: center; padding: 2rem; font-size: 0.75rem; line-height: 1.8; }
+
+    /* ── Market Stats Bar ─── */
+    .stats-bar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      overflow-x: auto;
+    }
+    .stats-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      gap: 2rem;
+      min-width: max-content;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1a5aed;
+    }
+    .stat-value.green { color: var(--success); }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── News Grid ─── */
+    .news-section { margin-top: 3rem; }
+    .news-section h2 { font-size: 1.6rem; text-align: center; margin-bottom: 2rem; color: #002d75; }
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .news-card {
+      background: var(--card);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .news-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+
+    .card-header {
+      padding: 1.25rem 1.25rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-category {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .card-date {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .card-body { padding: 0.75rem 1.25rem 1rem; flex: 1; }
+    .card-body h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+    .card-body h3 a {
+      color: var(--text);
+      text-decoration: none;
+    }
+    .card-body h3 a:hover { color: #1a5aed; }
+    .card-summary {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .card-footer {
+      padding: 0.75rem 1.25rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-source {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .card-tags { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    .tag {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.5rem;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      border-radius: 999px;
+    }
+
+    /* ── NFT Badge Section ─── */
+    .nft-section {
+      margin-top: 2.5rem;
+      padding: 2rem;
+      background: linear-gradient(135deg, #1e1b4b, #312e81);
+      border-radius: 16px;
+      color: white;
+      text-align: center;
+    }
+    .nft-section h2 { margin-bottom: 0.5rem; color: white; }
+    .nft-section p { opacity: 0.8; max-width: 600px; margin: 0 auto 1rem; font-size: 0.95rem; }
+    .nft-badge {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      font-size: 0.9rem;
+    }
 
     @media (max-width: 640px) {
       .form-grid { grid-template-columns: 1fr; }
       .result-hero .price-range { font-size: 1.5rem; }
+      .news-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
+<!-- Navigation Bar -->
+<nav>
+  <div class="nav-inner">
+    <a href="https://stellarise.io" class="logo-wrap">
+      <img src="https://stellarise.io/wp-content/uploads/2024/05/logo.png" alt="Stellarise" class="logo-mark" onerror="this.src='logo.png'" />
+      <span class="logo-text">Stellarise</span>
+    </a>
+    <div class="nav-links" id="navLinksVal">
+      <a href="https://stellarise.io">Home</a>
+      <a href="https://stellarise.io/news/">News</a>
+      <a href="/" class="active">Valuation</a>
+      <a href="https://stellarise.io/nft-verification/" class="nav-btn">Get Verified</a>
+    </div>
+    <div class="hamburger" onclick="document.getElementById('navLinksVal').classList.toggle('active')" style="display: none; flex-direction: column; gap: 4px; cursor: pointer; padding: 8px;">
+      <span style="width: 24px; height: 3px; background: #1a5aed; border-radius: 2px;"></span>
+      <span style="width: 24px; height: 3px; background: #1a5aed; border-radius: 2px;"></span>
+      <span style="width: 24px; height: 3px; background: #1a5aed; border-radius: 2px;"></span>
+    </div>
+  </div>
+</nav>
+
 <header>
-  <h1>Stellarise <span>Estimated Market Value</span></h1>
-  <p>Get an instant property estimate based on recent comparable transactions in Malaysia</p>
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1rem;">
+      <img src="logo.png" alt="Stellarise" style="height: 48px; width: auto;" />
+      <h1 style="margin-bottom: 0;">PropertyNFT <span>Malaysia</span></h1>
+    </div>
+    <p>Real estate news, market data &amp; verified ownership NFTs on Polygon</p>
+    <div style="display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap; justify-content: center;">
+      <span style="background: rgba(255,255,255,0.15); padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 0.8rem; backdrop-filter: blur(4px);">Polygon Network</span>
+      <span style="background: rgba(255,255,255,0.15); padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 0.8rem; backdrop-filter: blur(4px);">Soulbound NFT</span>
+      <span style="background: rgba(255,255,255,0.15); padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 0.8rem; backdrop-filter: blur(4px);">189,157 Properties Listed</span>
+      <span style="background: rgba(255,255,255,0.15); padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 0.8rem; backdrop-filter: blur(4px);">Auto-updated Every 6h</span>
+    </div>
+  </div>
 </header>
 
-<div class="container">
-
-  <!-- Disclaimer -->
-  <div class="disclaimer">
-    <strong>Important Notice</strong>
-    This estimate is for indicative marketing use only. It is not a bank valuation, legal valuation, or certified valuation report.
-    Final market value may vary based on inspection, title details, property condition, and current demand.
-    For financing, legal proceedings, probate, or formal reporting, obtain a valuation from a registered valuer.
+<!-- Market Stats -->
+<div class="stats-bar">
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat"><div class="stat-value green">4.5%</div><div class="stat-label">GDP Growth</div></div>
+    <div class="stat"><div class="stat-value">2.75%</div><div class="stat-label">OPR Rate</div></div>
+    <div class="stat"><div class="stat-value green">+7.8%</div><div class="stat-label">Transactions YoY</div></div>
+    <div class="stat"><div class="stat-value green">+4.2%</div><div class="stat-label">KL Prices</div></div>
+    <div class="stat"><div class="stat-value">RM 4.09</div><div class="stat-label">MYR/USD</div></div>
+    <div class="stat"><div class="stat-value">8%</div><div class="stat-label">Foreign Stamp Duty</div></div>
+    <div class="stat"><div class="stat-value">1M</div><div class="stat-label">Affordable Homes Target</div></div>
   </div>
+</div>
 
-  <!-- Form -->
-  <form id="valuationForm">
+<div class="page-body">
+  <div class="main-content">
+    <div class="form-card">
+      <div class="form-card-header">
+        <h2>Property Valuation Calculator</h2>
+      </div>
+      
+      <!-- Disclaimer -->
+      <div class="disclaimer" style="margin: 1rem;">
+        <strong>Important Notice</strong>
+        This estimate is for indicative marketing use only. It is not a bank valuation, legal valuation, or certified valuation report.
+        Final market value may vary based on inspection, title details, property condition, and current demand.
+        For financing, legal proceedings, probate, or formal reporting, obtain a valuation from a registered valuer.
+      </div>
+
+      <!-- Form -->
+      <form id="valuationForm">
 
     <div class="form-section">
       <h2>Property Details</h2>
@@ -132,16 +405,46 @@
         <div class="form-group">
           <label>Property Type <span class="req">*</span></label>
           <select name="propertyType" required>
-            <option value="">Select...</option>
-            <option value="condominium">Condominium</option>
-            <option value="apartment">Apartment</option>
-            <option value="serviced_residence">Serviced Residence</option>
-            <option value="flat">Flat</option>
-            <option value="terrace">Terrace</option>
-            <option value="semi_detached">Semi-Detached</option>
-            <option value="bungalow">Bungalow</option>
-            <option value="townhouse">Townhouse</option>
-            <option value="cluster_house">Cluster House</option>
+            <option value="">Select Property Type...</option>
+            <optgroup label="Residential">
+              <option value="condominium">Condominium</option>
+              <option value="apartment">Apartment</option>
+              <option value="serviced_residence">Serviced Residence</option>
+              <option value="flat">Flat</option>
+              <option value="terrace">Terrace</option>
+              <option value="semi_detached">Semi-Detached</option>
+              <option value="bungalow">Bungalow</option>
+              <option value="townhouse">Townhouse</option>
+              <option value="cluster_house">Cluster House</option>
+            </optgroup>
+            <optgroup label="Commercial">
+              <option value="shop_office">Shop/Office</option>
+              <option value="retail_space">Retail Space</option>
+              <option value="office_building">Office Building</option>
+              <option value="hotel_resort">Hotel/Resort</option>
+              <option value="shopping_mall">Shopping Mall</option>
+            </optgroup>
+            <optgroup label="Industrial">
+              <option value="factory">Factory</option>
+              <option value="warehouse">Warehouse</option>
+              <option value="industrial_land">Industrial Land</option>
+              <option value="workshop">Workshop</option>
+              <option value="light_industrial">Light Industrial</option>
+            </optgroup>
+            <optgroup label="Agricultural">
+              <option value="agricultural_land">Agricultural Land</option>
+              <option value="plantation">Plantation</option>
+              <option value="orchard">Orchard</option>
+              <option value="farm">Farm</option>
+              <option value="aquaculture">Aquaculture</option>
+            </optgroup>
+            <optgroup label="Land">
+              <option value="residential_land">Residential Land</option>
+              <option value="commercial_land">Commercial Land</option>
+              <option value="development_land">Development Land</option>
+              <option value="vacant_land">Vacant Land</option>
+              <option value="malay_reserve">Malay Reserve Land</option>
+            </optgroup>
           </select>
         </div>
         <div class="form-group">
@@ -292,7 +595,7 @@
       </div>
     </div>
 
-    <button type="submit" class="btn btn-primary" id="submitBtn">Get Estimated Market Value</button>
+    <button type="submit" class="btn btn-primary" id="submitBtn">Get Sale &amp; Rental Estimate</button>
   </form>
 
   <!-- Loading -->
@@ -305,16 +608,97 @@
   <div id="results">
     <!-- Filled by JS -->
   </div>
+  
+  </div> <!-- End form-card -->
+  </div> <!-- End main-content -->
 
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <!-- Get Verified CTA -->
+    <div class="verify-card">
+      <h3>🏆 Prove Your Ownership</h3>
+      <p>Get your property verified on-chain with a Stellarise NFT — trusted by buyers, banks and agents.</p>
+      <a href="https://stellarise.io/nft-verification/" class="btn-verify">Get Verified →</a>
+    </div>
+
+    <!-- Market Stats -->
+    <div class="side-card">
+      <div class="side-card-header">📊 Malaysia Market Overview</div>
+      <div class="stats-grid-sidebar">
+        <div class="stat-item">
+          <div class="stat-label">GDP Growth</div>
+          <div class="stat-value-sidebar green">4.5%</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">OPR Rate</div>
+          <div class="stat-value-sidebar">2.75%</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Transactions</div>
+          <div class="stat-value-sidebar green">+7.8%</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">KL Prices</div>
+          <div class="stat-value-sidebar green">+4.2%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Latest News Preview -->
+    <div class="side-card">
+      <div class="side-card-header">
+        📰 Latest Property News
+        <div class="live-indicator">
+          <div class="live-dot"></div>
+          <span class="live-text">LIVE</span>
+        </div>
+      </div>
+      <div class="news-list" id="sidebarNewsList">
+        <!-- Will be populated by JS -->
+      </div>
+    </div>
+  </div>
+  
+</div> <!-- End page-body -->
+
+<!-- Full News Section (below the page-body) -->
+<div class="container">
+  <div class="news-section">
+    <h2 style="display: inline-flex; align-items: center; gap: 1rem;">
+      Latest Property News
+      <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem;">
+        <span style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%; animation: pulse 1.5s infinite;"></span>
+        <span style="font-weight: 700; color: #22c55e; text-transform: uppercase; letter-spacing: 0.05em;">LIVE</span>
+      </span>
+    </h2>
+    <div class="news-grid" id="newsGrid">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading Malaysian property news...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- NFT Section -->
+  <div class="nft-section">
+    <h2>Verified Property Ownership NFT</h2>
+    <p>Each property deed verified by our title authority is minted as a soulbound NFT on Polygon. Non-tradeable on marketplaces — a true badge of verified ownership.</p>
+    <div class="nft-badge">
+      Contract: PropertyOwnershipNFT (PNFT) — Polygon Network
+    </div>
+  </div>
 </div>
 
 <footer>
-  Stellarise.io &copy; 2026 &mdash; Estimated Market Value Tool &mdash; Based on Recent Comparable Transactions
+  <div style="font-weight: 700; margin-bottom: 0.5rem;">Stellarise.io &copy; 2026</div>
+  Estimated Market Value Tool &mdash; Based on Recent Comparable Transactions
   <br />Data sources: NAPIC / JPPH, iProperty.com.my, The Edge Property, PropertyGuru
 </footer>
 
 <script>
-const API = "/api";
+const API = window.location.hostname === 'localhost'
+  ? 'http://localhost:3001/api'
+  : 'https://valuation.stellarise.io/api';
 
 document.getElementById("valuationForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -374,15 +758,15 @@ function fmt(n) {
 function renderResults(r, input) {
   const resultsDiv = document.getElementById("results");
 
-  if (!r.marketValue) {
+  if (r.error || !r.marketValue) {
+    const msg = r.error || (r.confidence && r.confidence.reasons ? r.confidence.reasons.join(". ") : "No comparable transactions found in the area.");
     resultsDiv.innerHTML = `
       <div class="result-hero" style="background: linear-gradient(135deg, #7f1d1d, #991b1b);">
         <h2>Unable to Estimate</h2>
-        <p style="opacity:0.8">${r.confidence.reasons.join(". ")}</p>
-        <p style="margin-top:1rem; opacity:0.7">Please request a registered valuer review for this property.</p>
+        <p style="opacity:0.8">${msg}</p>
+        <p style="margin-top:1rem; opacity:0.7">Please check your inputs or request a registered valuer review.</p>
       </div>
       <div class="cta-row">
-        <button class="btn btn-primary" onclick="requestReview('${r.estimateId}', 'valuer')">Request Registered Valuer</button>
         <button class="btn btn-secondary" onclick="document.getElementById('results').style.display='none'; window.scrollTo(0,0);">Try Another Property</button>
       </div>`;
     resultsDiv.style.display = "block";
@@ -391,17 +775,36 @@ function renderResults(r, input) {
 
   const confClass = r.confidence.band;
 
+  const rental = r.rentalEstimate;
+  const furnishLabel = { unfurnished: 'Unfurnished', partially_furnished: 'Partially Furnished', fully_furnished: 'Fully Furnished' };
+  const rentalHtml = rental && rental.monthlyLow ? `
+    <div class="result-hero rental">
+      <h2>Estimated Monthly Rental</h2>
+      <div class="price-range">${fmt(rental.monthlyLow)} — ${fmt(rental.monthlyHigh)}</div>
+      <div class="price-mid">Mid estimate: ${fmt(rental.monthlyMid)} / month</div>
+      <div class="hero-badge">Gross yield ${rental.grossYieldLow}% – ${rental.grossYieldHigh}%</div>
+      <div class="hero-sub">${furnishLabel[rental.furnishingLevel] || 'Unfurnished'} basis · Yield-derived</div>
+    </div>` : `
+    <div class="result-hero rental">
+      <h2>Estimated Monthly Rental</h2>
+      <div class="price-mid" style="margin-top:1rem; opacity:0.8">Rental estimate unavailable</div>
+    </div>`;
+
   resultsDiv.innerHTML = `
-    <!-- Hero: Market Value Range -->
-    <div class="result-hero">
-      <h2>Estimated Market Value</h2>
-      <div class="price-range">${fmt(r.marketValue.low)} — ${fmt(r.marketValue.high)}</div>
-      <div class="price-mid">Mid estimate: ${fmt(r.marketValue.mid)}</div>
+    <!-- Heroes: Sale + Rental side by side -->
+    <div class="heroes-row">
+      <div class="result-hero sale">
+        <h2>Estimated Sale Value</h2>
+        <div class="price-range">${fmt(r.marketValue.low)} — ${fmt(r.marketValue.high)}</div>
+        <div class="price-mid">Mid estimate: ${fmt(r.marketValue.mid)}</div>
+        <div class="hero-badge">RM ${r.pricingBasis.weightedPsf}/sqft · ${r.pricingBasis.compCount} comps</div>
+      </div>
+      ${rentalHtml}
     </div>
 
     <!-- Suggested Listing Range -->
     <div class="listing-range">
-      <h3>Suggested Listing Range</h3>
+      <h3>Suggested Listing Range (Sale)</h3>
       <div class="range">${fmt(r.suggestedListing.low)} — ${fmt(r.suggestedListing.high)}</div>
     </div>
 
@@ -445,7 +848,7 @@ function renderResults(r, input) {
 
     <!-- CTAs -->
     <div class="cta-row">
-      <button class="btn btn-primary" onclick="alert('Coming soon — List your property on Stellarise.io')">List Property Now</button>
+      <a href="https://stellarise.io/nft-verification/" class="btn btn-primary" style="text-decoration: none; text-align: center;">List Property Now</a>
       <button class="btn btn-secondary" onclick="requestReview('${r.estimateId}', 'agent')">Request Agent Review</button>
       <button class="btn btn-secondary" onclick="requestReview('${r.estimateId}', 'valuer')">Request Registered Valuer</button>
     </div>
@@ -475,6 +878,72 @@ async function requestReview(estimateId, reviewType) {
     alert("Error submitting review request. Please try again.");
   }
 }
+
+// News functionality
+let allArticles = [];
+
+async function fetchNews() {
+  try {
+    const res = await fetch(`${API}/news`);
+    const data = await res.json();
+    allArticles = data.articles || [];
+    renderNews(allArticles);
+  } catch {
+    // Fallback: load seed data directly if API not running
+    document.getElementById("newsGrid").innerHTML =
+      '<p class="loading">No news available at this time.</p>';
+  }
+}
+
+function renderNews(articles) {
+  const grid = document.getElementById("newsGrid");
+  const sidebarList = document.getElementById("sidebarNewsList");
+  
+  if (!articles.length) {
+    grid.innerHTML = '<p class="loading">No articles found.</p>';
+    sidebarList.innerHTML = '<div class="news-item"><p style="text-align:center;color:var(--muted);font-size:0.8rem;">No news available</p></div>';
+    return;
+  }
+  
+  // Sort by date
+  const sortedArticles = articles.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+  
+  // Show only first 6 articles in main grid
+  const topArticles = sortedArticles.slice(0, 6);
+  grid.innerHTML = topArticles
+    .map((a) => `
+      <div class="news-card">
+        <div class="card-header">
+          <span class="card-category">${a.category}</span>
+          <span class="card-date">${new Date(a.publishedAt).toLocaleDateString("en-MY", { day: "numeric", month: "short", year: "numeric" })}</span>
+        </div>
+        <div class="card-body">
+          <h3><a href="${a.url}" target="_blank" rel="noopener">${a.title}</a></h3>
+          ${a.summary ? `<p class="card-summary">${a.summary}</p>` : ""}
+        </div>
+        <div class="card-footer">
+          <span class="card-source">${a.source}</span>
+          <div class="card-tags">
+            ${(a.tags || []).slice(0, 3).map((t) => `<span class="tag">${t}</span>`).join("")}
+          </div>
+        </div>
+      </div>
+    `).join("");
+    
+  // Show first 4 articles in sidebar
+  const sidebarArticles = sortedArticles.slice(0, 4);
+  sidebarList.innerHTML = sidebarArticles
+    .map((a) => `
+      <div class="news-item" onclick="window.open('${a.url}', '_blank')">
+        <div class="news-cat">${a.category}</div>
+        <div class="news-title">${a.title}</div>
+        <div class="news-date">${new Date(a.publishedAt).toLocaleDateString("en-MY", { day: "numeric", month: "short" })}</div>
+      </div>
+    `).join("");
+}
+
+// Fetch news on page load
+fetchNews();
 </script>
 </body>
 </html>
