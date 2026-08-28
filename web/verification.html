@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Property Verification — Stellarise</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      /* ── Stellarise brand palette ── */
+      --blue:        #1a5aed;
+      --blue-light:  #4d8ef0;
+      --blue-dark:   #002d75;
+      --blue-mid:    #1f7bc6;
+      --cyan:        #50cdd9;
+      --green:       #00cc0c;
+      --green-light: #19e345;
+      --white:       #ffffff;
+      --text:        #1C1C1C;
+      --muted:       #64748b;
+      --bg:          #f5f7fb;
+      --card:        #ffffff;
+      --border:      #e2e8f0;
+      --shadow:      0 4px 24px rgba(0,0,0,0.08);
+      --radius:      16px;
+      --radius-pill: 9999px;
+
+      /* Exact Stellarise gradient (matches live site) */
+      --gradient: linear-gradient(135deg, #19e345 0%, #50cdd9 35%, #1f7bc6 65%, #002d75 100%);
+
+      /* 5 step colours — pulled from the brand gradient evenly */
+      --s1: #19e345;   /* green        */
+      --s2: #50cdd9;   /* cyan         */
+      --s3: #1f7bc6;   /* blue-mid     */
+      --s4: #1a5aed;   /* blue         */
+      --s5: #002d75;   /* navy         */
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Open Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.65; }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 200;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 1.5rem; height: 68px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo-wrap { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+    .logo-mark { height: 42px; width: auto; object-fit: contain; flex-shrink: 0; }
+    .logo-text {
+      font-family: 'Lato', sans-serif; font-weight: 900; font-size: 1.45rem;
+      background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; letter-spacing: -0.5px;
+    }
+    .nav-links { display: flex; align-items: center; gap: 1.75rem; }
+    .nav-links a {
+      color: var(--blue-light); text-decoration: none;
+      font-size: 0.9rem; font-weight: 600; transition: color 0.2s;
+    }
+    .nav-links a:hover   { color: var(--blue-dark); }
+    .nav-links a.active  { color: var(--blue); border-bottom: 2px solid var(--blue); padding-bottom: 2px; }
+    #walletBtn {
+      background: var(--blue); color: var(--white); border: none;
+      border-radius: var(--radius-pill); padding: 0.5rem 1.25rem;
+      font-family: 'Open Sans', sans-serif; font-size: 0.85rem; font-weight: 700;
+      cursor: pointer; transition: background 0.2s, transform 0.1s;
+    }
+    #walletBtn:hover     { background: var(--green); transform: translateY(-1px); }
+    #walletBtn.connected { background: var(--blue-dark); }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--gradient);
+      color: var(--white);
+      padding: 5rem 1.5rem 7rem;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero::after {
+      content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+      height: 70px; background: var(--bg);
+      clip-path: ellipse(55% 100% at 50% 100%);
+    }
+    .hero-inner { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
+
+    /* Logo in hero — larger mark + white wordmark */
+    .hero-logo-wrap {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0.75rem; margin-bottom: 1.75rem;
+    }
+    .hero-logo-mark { height: 64px; width: auto; object-fit: contain; flex-shrink: 0; }
+    .hero-logo-text {
+      font-family: 'Lato', sans-serif; font-weight: 900; font-size: 2.2rem;
+      color: var(--white); letter-spacing: -0.5px; line-height: 1;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35);
+      border-radius: var(--radius-pill); padding: 0.35rem 1.1rem;
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; margin-bottom: 1.25rem;
+    }
+    .hero h1 {
+      font-family: 'Lato', sans-serif; font-weight: 900;
+      font-size: clamp(2rem, 4.5vw, 3.2rem); line-height: 1.15; margin-bottom: 1.25rem;
+    }
+    .hero p { max-width: 560px; margin: 0 auto 2.5rem; opacity: 0.9; font-size: 1.05rem; }
+    .btn-hero {
+      display: inline-block; background: var(--white); color: var(--blue-dark);
+      border: none; border-radius: var(--radius-pill); padding: 1rem 2.5rem;
+      font-family: 'Lato', sans-serif; font-size: 1.05rem; font-weight: 900;
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18); line-height: 1.5;
+    }
+    .btn-hero:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.22); }
+    .hero-stats { display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; margin-top: 3rem; }
+    .hero-stat strong { display: block; font-family: 'Lato', sans-serif; font-size: 1.8rem; font-weight: 900; }
+    .hero-stat span   { font-size: 0.82rem; opacity: 0.8; }
+
+    /* ── TRUST BAR ── */
+    .trust-bar { background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 1.1rem 1.5rem; }
+    .trust-bar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 2.25rem; flex-wrap: wrap; }
+    .trust-item { display: flex; align-items: center; gap: 0.45rem; font-size: 0.8rem; font-weight: 600; color: var(--muted); }
+
+    /* ── HOW IT WORKS — 5 gradient steps ── */
+    .section { max-width: 1100px; margin: 0 auto; padding: 3.5rem 1.5rem; }
+    .section-title { font-family: 'Lato', sans-serif; font-weight: 900; font-size: 1.6rem; color: var(--blue-dark); text-align: center; margin-bottom: 0.5rem; }
+    .section-sub    { text-align: center; color: var(--muted); margin-bottom: 2.5rem; font-size: 0.92rem; }
+
+    .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
+    @media (max-width: 860px) { .steps { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .steps { grid-template-columns: 1fr; } }
+
+    .step {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem 1rem; text-align: center;
+      border-top: 4px solid var(--sc); transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .step:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .step:nth-child(1) { --sc: var(--s1); }
+    .step:nth-child(2) { --sc: var(--s2); }
+    .step:nth-child(3) { --sc: var(--s3); }
+    .step:nth-child(4) { --sc: var(--s4); }
+    .step:nth-child(5) { --sc: var(--s5); }
+
+    .step-num {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--sc); color: var(--white);
+      font-family: 'Lato', sans-serif; font-weight: 900; font-size: 0.88rem;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 0.7rem;
+    }
+    .step-icon { font-size: 1.6rem; margin-bottom: 0.5rem; }
+    .step h4   { font-family: 'Lato', sans-serif; font-weight: 700; font-size: 0.88rem; color: var(--blue-dark); margin-bottom: 0.3rem; }
+    .step p    { font-size: 0.76rem; color: var(--muted); }
+    /* step label colour matches its accent */
+    .step h4 { color: var(--sc); }
+
+    /* ── FOOTER ── */
+    footer { background: var(--blue-dark); color: rgba(255,255,255,0.7); text-align: center; padding: 2rem 1.5rem; font-size: 0.82rem; line-height: 2; }
+    footer a { color: var(--green-light); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ═══════════════════════════════════════════
+       MODAL
+    ═══════════════════════════════════════════ */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,20,60,0.55); backdrop-filter: blur(4px);
+      z-index: 500; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .overlay.open { display: flex; }
+    .modal {
+      background: var(--white); border-radius: 20px;
+      box-shadow: 0 24px 80px rgba(0,0,50,0.22);
+      max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto;
+      position: relative;
+      animation: slideUp 0.3s cubic-bezier(.22,.68,0,1.2);
+    }
+    @keyframes slideUp { from { opacity:0; transform: translateY(30px) scale(0.97); } to { opacity:1; transform: none; } }
+    .modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: var(--bg); border: none; border-radius: 50%;
+      width: 36px; height: 36px; font-size: 1.1rem; cursor: pointer;
+      color: var(--muted); display: flex; align-items: center; justify-content: center; z-index: 10;
+    }
+    .modal-close:hover { background: var(--border); }
+
+    /* ── Progress steps ── */
+    .progress-steps {
+      display: flex; align-items: flex-start; justify-content: center;
+      gap: 0; padding: 1rem 2rem 0; margin-bottom: 1rem;
+    }
+    .prog-step {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0.3rem; flex: 1; position: relative;
+    }
+    /* connector line */
+    .prog-step:not(:last-child)::after {
+      content: ''; position: absolute;
+      top: 14px; left: 58%; width: 84%; height: 2px;
+      background: var(--border); z-index: 0; transition: background 0.4s;
+    }
+    .prog-step.done:not(:last-child)::after { background: var(--green-light); }
+
+    .prog-circle {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid var(--border); background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 700; color: var(--muted);
+      z-index: 1; position: relative; transition: all 0.3s;
+    }
+    /* each step gets its brand colour when active */
+    .prog-step:nth-child(1) { --pc: var(--s1); }
+    .prog-step:nth-child(2) { --pc: var(--s2); }
+    .prog-step:nth-child(3) { --pc: var(--s3); }
+    .prog-step:nth-child(4) { --pc: var(--s4); }
+    .prog-step:nth-child(5) { --pc: var(--s5); }
+
+    .prog-step.active .prog-circle { border-color: var(--pc); background: var(--pc); color: var(--white); }
+    .prog-step.done   .prog-circle { border-color: var(--pc); background: var(--pc); color: var(--white); opacity: 0.75; }
+    .prog-label { font-size: 0.63rem; font-weight: 600; color: var(--muted); text-align: center; white-space: nowrap; }
+    .prog-step.active .prog-label { color: var(--pc); font-weight: 700; }
+    .prog-step.done   .prog-label { color: var(--pc); opacity: 0.75; }
+
+    /* ── Modal steps ── */
+    .modal-step { display: none; padding: 0 2rem 1.5rem; }
+    .modal-step.active { display: block; }
+    .modal-step h2 { font-family: 'Lato', sans-serif; font-weight: 900; font-size: 1.3rem; color: var(--blue-dark); margin-bottom: 0.3rem; }
+    .modal-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.25rem; }
+    .modal-back {
+      background: none; border: none; color: var(--muted); font-size: 0.82rem;
+      cursor: pointer; padding: 0; margin-bottom: 1rem;
+      display: inline-flex; align-items: center; gap: 0.3rem;
+    }
+    .modal-back:hover { color: var(--blue); }
+
+    /* ── Path cards ── */
+    .path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    @media (max-width: 540px) { .path-grid { grid-template-columns: 1fr; } }
+    .path-card {
+      border: 2px solid var(--border); border-radius: var(--radius);
+      padding: 1.25rem 1.25rem 1.5rem; cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s; text-align: center;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .path-card:hover { border-color: var(--blue); box-shadow: 0 6px 24px rgba(26,90,237,0.12); transform: translateY(-3px); }
+    .path-card .path-top { flex: 1; width: 100%; }
+    .path-card .path-icon { font-size: 2rem; margin-bottom: 0.6rem; }
+    .path-card h3 { font-family: 'Lato', sans-serif; font-weight: 900; font-size: 0.92rem; color: var(--blue-dark); margin-bottom: 0.5rem; line-height: 1.35; }
+    .path-card p  { font-size: 0.79rem; color: var(--muted); margin-bottom: 0; }
+    .path-badge   { display: inline-block; padding: 0.2rem 0.7rem; border-radius: var(--radius-pill); font-size: 0.7rem; font-weight: 700; margin-bottom: 0.75rem; }
+    .path-badge.managed { background: #f0fdf4; color: #166534; }
+    .path-badge.diy     { background: #eff6ff; color: #1e40af; }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      background: var(--blue); color: var(--white); border: none;
+      border-radius: var(--radius-pill); padding: 0.85rem 2rem;
+      font-family: 'Open Sans', sans-serif; font-size: 0.92rem; font-weight: 700;
+      cursor: pointer; transition: background 0.2s, transform 0.1s; width: 100%;
+    }
+    .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .btn-outline {
+      background: transparent; color: var(--blue); border: 2px solid var(--blue);
+      border-radius: var(--radius-pill); padding: 0.82rem 2rem;
+      font-family: 'Open Sans', sans-serif; font-size: 0.92rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; width: 100%;
+    }
+    .btn-outline:hover { background: var(--blue); color: var(--white); }
+
+    /* ── Forms ── */
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--blue-dark); margin-bottom: 0.35rem; }
+    .form-group input,
+    .form-group select {
+      width: 100%; padding: 0.62rem 0.9rem;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-family: 'Open Sans', sans-serif; font-size: 0.88rem;
+      background: var(--white); color: var(--text); transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus { outline: none; border-color: var(--blue); }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 480px) { .form-grid-2 { grid-template-columns: 1fr; } }
+    .phone-row { display: flex; gap: 0.5rem; }
+    .phone-row select { flex: 0 0 auto; width: 210px; }
+    .phone-row input  { flex: 1 1 auto; }
+    @media (max-width: 480px) { .phone-row { flex-direction: column; } .phone-row select { width: 100%; } }
+    .field-hint { display: block; font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; }
+    .divider { display: flex; align-items: center; gap: 0.75rem; margin: 1.25rem 0; color: var(--muted); font-size: 0.8rem; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── Wallet ── */
+    .wallet-box { border: 2px dashed var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; margin-bottom: 1.25rem; }
+    .wallet-box .fox { font-size: 3rem; margin-bottom: 0.75rem; }
+    .wallet-box h4 { font-family: 'Lato', sans-serif; font-weight: 700; color: var(--blue-dark); margin-bottom: 0.4rem; }
+    .wallet-box p  { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.25rem; }
+    .network-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-pill);
+      padding: 0.25rem 0.75rem; font-size: 0.78rem; font-weight: 700;
+      color: #166534; margin-bottom: 1rem;
+    }
+    .dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; animation: pulse 1.5s infinite; display: inline-block; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .wallet-ok { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 1rem; text-align: center; }
+    .wallet-ok .wok-addr { font-family: monospace; font-size: 0.8rem; color: #166534; }
+
+    /* ── Upload ── */
+    .upload-zone {
+      border: 2px dashed var(--border); border-radius: var(--radius);
+      padding: 1.75rem; text-align: center; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s; margin-bottom: 0.75rem;
+    }
+    .upload-zone:hover { border-color: var(--blue); background: #f8fbff; }
+    .upload-zone .upload-icon { font-size: 2rem; margin-bottom: 0.4rem; }
+    .upload-zone p { font-size: 0.82rem; color: var(--muted); }
+    .upload-zone strong { color: var(--blue); }
+    .upload-zone input[type=file] { display: none; }
+    .file-list { font-size: 0.8rem; color: #166534; min-height: 1rem; margin-top: 0.4rem; }
+
+    /* ── Plans ── */
+    .plans-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.25rem; }
+    @media (max-width: 600px) { .plans-grid { grid-template-columns: 1fr; } }
+    .plan-card {
+      border: 2px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem 1.25rem; text-align: center; cursor: pointer;
+      transition: all 0.2s; position: relative;
+    }
+    .plan-card:hover { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,90,237,0.1); }
+    .plan-card.selected { border-color: var(--blue); background: #eff6ff; }
+    .plan-card.popular::before {
+      content: 'Most Popular'; position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+      background: var(--blue); color: var(--white); font-size: 0.65rem; font-weight: 700;
+      padding: 0.2rem 0.75rem; border-radius: var(--radius-pill); white-space: nowrap;
+    }
+    .plan-name     { font-family: 'Lato', sans-serif; font-weight: 900; font-size: 0.92rem; color: var(--blue-dark); margin-bottom: 0.4rem; }
+    .plan-price    { font-family: 'Lato', sans-serif; font-weight: 900; font-size: 1.6rem; color: var(--blue); margin-bottom: 0.2rem; }
+    .plan-price small { font-size: 0.75rem; font-weight: 400; color: var(--muted); }
+    .plan-listings { font-size: 0.74rem; color: var(--muted); margin-bottom: 1rem; }
+    .plan-features { list-style: none; text-align: left; font-size: 0.76rem; color: var(--muted); margin-bottom: 1rem; }
+    .plan-features li { padding: 0.2rem 0; }
+    .plan-features li::before { content: '✓ '; color: var(--green); font-weight: 700; }
+
+    /* ── Notice ── */
+    .notice { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.8rem; color: #92400e; margin-bottom: 1.25rem; }
+
+    /* ── Success ── */
+    .success-box { text-align: center; padding: 1rem 0 0.5rem; }
+    .success-box .check { font-size: 3.5rem; margin-bottom: 0.75rem; }
+    .success-box h3 { font-family: 'Lato', sans-serif; font-weight: 900; font-size: 1.35rem; color: var(--blue-dark); margin-bottom: 0.5rem; }
+    .success-box p  { color: var(--muted); font-size: 0.88rem; max-width: 380px; margin: 0 auto 1.25rem; }
+    .listing-banner {
+      background: var(--blue-dark); border-radius: var(--radius);
+      padding: 1.5rem 1.75rem; color: var(--white); margin-top: 1.25rem;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap; text-align: left;
+      border-left: 5px solid var(--green-light);
+    }
+    .listing-banner strong { font-family: 'Lato', sans-serif; font-size: 1.05rem; display: block; margin-bottom: 0.35rem; color: var(--green-light); }
+    .listing-banner p { font-size: 0.85rem; color: rgba(255,255,255,0.92); margin: 0; line-height: 1.55; }
+    .btn-listing {
+      background: var(--white); color: var(--blue-dark); border: none;
+      border-radius: var(--radius-pill); padding: 0.65rem 1.5rem;
+      font-weight: 700; font-size: 0.85rem; cursor: pointer;
+      white-space: nowrap; transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-listing:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════ NAV ═══════ -->
+<nav>
+  <div class="nav-inner">
+    <a href="https://stellarise.io/" class="logo-wrap">
+      <img src="logo.png" alt="Stellarise" class="logo-mark" />
+      <span class="logo-text">Stellarise</span>
+    </a>
+    <div class="nav-links">
+      <a href="#">Buy Property</a>
+      <a href="#">Rent</a>
+      <a href="#" class="active">Get Verified</a>
+      <a href="https://valuation.stellarise.io">Valuation Tool</a>
+      <a href="#">Blog</a>
+      <button id="walletBtn" onclick="openModal()">Connect Wallet</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════ HERO ═══════ -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-logo-wrap">
+      <img src="logo.png" alt="Stellarise" class="hero-logo-mark" />
+      <span class="hero-logo-text">Stellarise</span>
+    </div>
+    <div class="hero-badge">🔗 Blockchain-Powered &middot; Polygon Network</div>
+    <h1>Property Ownership<br>Verification</h1>
+    <p>Mint a tamper-proof NFT certificate for your Malaysian property. Verified on-chain by Stellarise — trusted by buyers, banks and agents.</p>
+    <button class="btn-hero" onclick="openModal()">
+      Prove your property ownership — Build buyer trust<br>
+      <span style="font-size:0.88em;opacity:0.8;font-weight:700;">Get verified today &rarr;</span>
+    </button>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong>—</strong><span>Properties Verified</span></div>
+      <div class="hero-stat"><strong>Polygon</strong><span>Network</span></div>
+      <div class="hero-stat"><strong>ERC-721</strong><span>Standard</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ TRUST BAR ═══════ -->
+<div class="trust-bar">
+  <div class="trust-bar-inner">
+    <div class="trust-item">🏛️ Malaysia Title Deed Verified</div>
+    <div class="trust-item">🔒 On-chain &amp; Immutable</div>
+    <div class="trust-item">🏦 Trusted by Banks &amp; Agents</div>
+    <div class="trust-item">⚡ Polygon — Low Fees</div>
+    <div class="trust-item">🇲🇾 Built for Malaysia</div>
+  </div>
+</div>
+
+<!-- ═══════ HOW IT WORKS ═══════ -->
+<div class="section">
+  <h2 class="section-title">How it works</h2>
+  <p class="section-sub">Five simple steps — including a free instant valuation</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-icon">👤</div>
+      <h4>Create Account</h4>
+      <p>Register free with Stellarise in under 2 minutes.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-icon">💎</div>
+      <h4>Free Valuation</h4>
+      <p>Get an instant market estimate for your property — free, no commitment.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-icon">📄</div>
+      <h4>Upload Title Deed</h4>
+      <p>Submit your Geran and documents securely through our portal.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-icon">💳</div>
+      <h4>Choose Plan</h4>
+      <p>Pick a plan for direct owners or agents. Pay via secure checkout.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-icon">🏆</div>
+      <h4>Verified &amp; List</h4>
+      <p>Your NFT is minted on Polygon — post your listing with the Ownership Verified badge.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer>
+  <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:0.6rem;">
+    <img src="logo.png" alt="Stellarise" style="height:32px;width:auto;" />
+    <span style="font-family:'Lato',sans-serif;font-weight:900;font-size:1.4rem;color:var(--green-light);letter-spacing:-0.5px;">Stellarise</span>
+  </div>
+  <div>&copy; 2026 <a href="https://stellarise.io/">Stellarise.io</a> — Malaysian Property Blockchain Verification &middot; <a href="#">Terms</a> &middot; <a href="#">Privacy</a></div>
+  <div style="margin-top:0.4rem;font-size:0.75rem;opacity:0.6;">Indicative verification only. For financing or legal purposes, consult a registered valuer. Not financial advice.</div>
+</footer>
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL
+═══════════════════════════════════════════════ -->
+<div class="overlay" id="overlay" onclick="closeOnBackdrop(event)">
+<div class="modal" id="modal">
+  <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-steps" id="progressBar">
+    <div class="prog-step" id="ps1"><div class="prog-circle">1</div><div class="prog-label">Account</div></div>
+    <div class="prog-step" id="ps2"><div class="prog-circle">2</div><div class="prog-label">Valuation</div></div>
+    <div class="prog-step" id="ps3"><div class="prog-circle">3</div><div class="prog-label">Docs</div></div>
+    <div class="prog-step" id="ps4"><div class="prog-circle">4</div><div class="prog-label">Plan</div></div>
+    <div class="prog-step" id="ps5"><div class="prog-circle">5</div><div class="prog-label">Verified</div></div>
+  </div>
+
+  <!-- ── Step 0: Choose path ── -->
+  <div class="modal-step active" id="stepChoose">
+    <h2>Get your property verified</h2>
+    <p class="modal-sub">Choose how you'd like to proceed. You'll create a free Stellarise account first, then upload your title deed.</p>
+    <div class="path-grid">
+      <div class="path-card" onclick="choosePath('managed')">
+        <div class="path-top">
+          <div class="path-icon">🏢</div>
+          <span class="path-badge managed">Recommended</span>
+          <h3>Let Stellarise handle your docs and create your NFT Property Ownership</h3>
+          <p>Our team verifies your title deed and mints your NFT. Hands-off — no wallet needed to start.</p>
+        </div>
+        <button class="btn-primary" style="margin-top:1rem;" onclick="choosePath('managed')">Get Started with Stellarise</button>
+      </div>
+      <div class="path-card" onclick="choosePath('diy')">
+        <div class="path-top">
+          <div class="path-icon">🦊</div>
+          <span class="path-badge diy">Self-Service</span>
+          <h3>Connect your wallet, upload your docs, and receive your NFT directly</h3>
+          <p>Already have a MetaMask wallet? Upload your title deed yourself and receive the NFT straight to your wallet.</p>
+        </div>
+        <button class="btn-outline" style="margin-top:1rem;" onclick="choosePath('diy')">Do It Yourself</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Step 1: Account ── -->
+  <div class="modal-step" id="stepAccount">
+    <button class="modal-back" onclick="show('stepChoose');setProgress(0);">&#8592; Back</button>
+    <h2>Create your free account</h2>
+    <p class="modal-sub">Your data is encrypted and used only for title deed verification.</p>
+    <div class="form-grid-2">
+      <div class="form-group"><label>First Name <span style="font-weight:400;color:var(--muted);font-size:0.82rem;">/ Given Name</span></label><input id="firstName" placeholder="e.g. Ahmad, James, Wei" /></div>
+      <div class="form-group"><label>Last Name <span style="font-weight:400;color:var(--muted);font-size:0.82rem;">/ Family Name</span></label><input id="lastName" placeholder="e.g. Ng, Smith, García" /></div>
+    </div>
+    <div class="form-group"><label>Email Address</label><input type="email" id="emailInput" placeholder="ahmad@email.com" /></div>
+    <div class="form-group">
+      <label>Phone Number</label>
+      <div class="phone-row">
+        <select id="phoneCountry" title="Country dial code">
+          <option value="+60" selected>🇲🇾 Malaysia (+60)</option>
+          <option value="+65">🇸🇬 Singapore (+65)</option>
+          <option value="+62">🇮🇩 Indonesia (+62)</option>
+          <option value="+63">🇵🇭 Philippines (+63)</option>
+          <option value="+66">🇹🇭 Thailand (+66)</option>
+          <option value="+84">🇻🇳 Vietnam (+84)</option>
+          <option value="+95">🇲🇲 Myanmar (+95)</option>
+          <option value="+855">🇰🇭 Cambodia (+855)</option>
+          <option value="+856">🇱🇦 Laos (+856)</option>
+          <option value="+673">🇧🇳 Brunei (+673)</option>
+          <option value="+86">🇨🇳 China (+86)</option>
+          <option value="+852">🇭🇰 Hong Kong (+852)</option>
+          <option value="+853">🇲🇴 Macau (+853)</option>
+          <option value="+886">🇹🇼 Taiwan (+886)</option>
+          <option value="+81">🇯🇵 Japan (+81)</option>
+          <option value="+82">🇰🇷 South Korea (+82)</option>
+          <option value="+91">🇮🇳 India (+91)</option>
+          <option value="+92">🇵🇰 Pakistan (+92)</option>
+          <option value="+880">🇧🇩 Bangladesh (+880)</option>
+          <option value="+94">🇱🇰 Sri Lanka (+94)</option>
+          <option value="+977">🇳🇵 Nepal (+977)</option>
+          <option value="+971">🇦🇪 UAE (+971)</option>
+          <option value="+966">🇸🇦 Saudi Arabia (+966)</option>
+          <option value="+974">🇶🇦 Qatar (+974)</option>
+          <option value="+973">🇧🇭 Bahrain (+973)</option>
+          <option value="+968">🇴🇲 Oman (+968)</option>
+          <option value="+965">🇰🇼 Kuwait (+965)</option>
+          <option value="+961">🇱🇧 Lebanon (+961)</option>
+          <option value="+20">🇪🇬 Egypt (+20)</option>
+          <option value="+27">🇿🇦 South Africa (+27)</option>
+          <option value="+234">🇳🇬 Nigeria (+234)</option>
+          <option value="+254">🇰🇪 Kenya (+254)</option>
+          <option value="+44">🇬🇧 UK (+44)</option>
+          <option value="+33">🇫🇷 France (+33)</option>
+          <option value="+49">🇩🇪 Germany (+49)</option>
+          <option value="+39">🇮🇹 Italy (+39)</option>
+          <option value="+34">🇪🇸 Spain (+34)</option>
+          <option value="+31">🇳🇱 Netherlands (+31)</option>
+          <option value="+32">🇧🇪 Belgium (+32)</option>
+          <option value="+41">🇨🇭 Switzerland (+41)</option>
+          <option value="+43">🇦🇹 Austria (+43)</option>
+          <option value="+46">🇸🇪 Sweden (+46)</option>
+          <option value="+47">🇳🇴 Norway (+47)</option>
+          <option value="+45">🇩🇰 Denmark (+45)</option>
+          <option value="+358">🇫🇮 Finland (+358)</option>
+          <option value="+48">🇵🇱 Poland (+48)</option>
+          <option value="+351">🇵🇹 Portugal (+351)</option>
+          <option value="+30">🇬🇷 Greece (+30)</option>
+          <option value="+7">🇷🇺 Russia (+7)</option>
+          <option value="+380">🇺🇦 Ukraine (+380)</option>
+          <option value="+1">🇺🇸 USA / Canada (+1)</option>
+          <option value="+52">🇲🇽 Mexico (+52)</option>
+          <option value="+55">🇧🇷 Brazil (+55)</option>
+          <option value="+54">🇦🇷 Argentina (+54)</option>
+          <option value="+56">🇨🇱 Chile (+56)</option>
+          <option value="+57">🇨🇴 Colombia (+57)</option>
+          <option value="+51">🇵🇪 Peru (+51)</option>
+          <option value="+61">🇦🇺 Australia (+61)</option>
+          <option value="+64">🇳🇿 New Zealand (+64)</option>
+        </select>
+        <input type="tel" id="phoneInput" placeholder="12-345 6789" />
+      </div>
+      <small class="field-hint">Dial code pre-selected — enter local number without leading 0</small>
+    </div>
+    <div class="form-group">
+      <label>Country</label>
+      <select id="countrySelect" size="1"></select>
+    </div>
+    <div class="form-group"><label>Password</label><input type="password" id="passwordInput" placeholder="Min. 8 characters" /></div>
+    <button class="btn-primary" onclick="submitAccount()">Create Account &amp; Continue</button>
+    <div class="divider">Already have an account?</div>
+    <button class="btn-outline" onclick="submitAccount()">Sign In</button>
+  </div>
+
+  <!-- ── Step 2: Instant Valuation ── -->
+  <div class="modal-step" id="stepValuation">
+    <button class="modal-back" onclick="show('stepAccount');setProgress(1);">&#8592; Back</button>
+    <h2>Instant Property Valuation</h2>
+    <p class="modal-sub">Enter your property details to get a free market estimate — powered by Stellarise AVM.</p>
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label>Property Type <span class="req">*</span></label>
+        <select id="val-type">
+          <option value="">Select...</option>
+          <option value="condominium">Condominium</option>
+          <option value="serviced_residence">Serviced Residence</option>
+          <option value="apartment">Apartment</option>
+          <option value="flat">Flat</option>
+          <option value="terrace">Terrace</option>
+          <option value="semi_detached">Semi-Detached</option>
+          <option value="bungalow">Bungalow</option>
+          <option value="townhouse">Townhouse</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tenure <span class="req">*</span></label>
+        <select id="val-tenure">
+          <option value="">Select...</option>
+          <option value="freehold">Freehold</option>
+          <option value="leasehold">Leasehold</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Project / Building Name</label><input id="val-project" placeholder="e.g. St Mary Residences" /></div>
+    <div class="form-group"><label>Address <span class="req">*</span></label><input id="val-address" placeholder="e.g. Jalan Stonor, KLCC" /></div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>Postcode <span class="req">*</span></label><input id="val-postcode" placeholder="e.g. 50450" maxlength="10" /></div>
+      <div class="form-group">
+        <label>State <span class="req">*</span></label>
+        <select id="val-state">
+          <option value="">Select...</option>
+          <option>Kuala Lumpur</option><option>Selangor</option><option>Johor</option>
+          <option>Penang</option><option>Perak</option><option>Kedah</option>
+          <option>Kelantan</option><option>Melaka</option><option>Negeri Sembilan</option>
+          <option>Pahang</option><option>Sabah</option><option>Sarawak</option>
+          <option>Terengganu</option><option>Perlis</option><option>Putrajaya</option><option>Labuan</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>Built-up Area (sq ft) <span class="req">*</span></label><input id="val-sqft" type="text" inputmode="numeric" placeholder="e.g. 1200" /></div>
+      <div class="form-group"><label>Bedrooms</label><input id="val-beds" type="text" inputmode="numeric" placeholder="e.g. 3" /></div>
+    </div>
+
+    <button class="btn-primary" id="val-btn" onclick="runValuation()">Get Instant Estimate &rarr;</button>
+
+    <!-- Result card -->
+    <div id="val-result" style="display:none;margin-top:1.25rem;">
+      <div id="val-estimate-box" style="border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;background:linear-gradient(135deg,var(--blue-dark),var(--blue-mid));color:#fff;">
+        <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;opacity:0.8;margin-bottom:0.4rem;">Estimated Market Value</div>
+        <div id="val-range" style="font-family:'Lato',sans-serif;font-weight:900;font-size:1.5rem;margin-bottom:0.2rem;"></div>
+        <div id="val-mid-label" style="font-size:0.82rem;opacity:0.85;margin-bottom:0.75rem;"></div>
+        <div id="val-reasons" style="font-size:0.76rem;opacity:0.8;line-height:1.6;"></div>
+      </div>
+      <div id="val-nodata" style="display:none;background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:10px;padding:0.85rem 1rem;font-size:0.82rem;color:var(--warn-text);margin-bottom:1rem;"></div>
+      <button class="btn-primary" onclick="proceedToDocs()">Continue — Upload Title Deed &rarr;</button>
+    </div>
+    <button class="btn-outline" style="margin-top:0.75rem;" onclick="skipValuation()">Skip for now &rarr;</button>
+  </div>
+
+  <!-- ── Step 3: Upload docs ── -->
+  <div class="modal-step" id="stepDocs">
+    <button class="modal-back" onclick="show('stepValuation');setProgress(2);">&#8592; Back</button>
+    <h2>Upload your title deed</h2>
+    <p class="modal-sub">Our team verifies your documents within 1–3 business days.</p>
+    <div class="form-group"><label>Property Title Number (Hakmilik / Geran)</label><input id="titleNum" placeholder="e.g. HS(D) 12345, PT 678" /></div>
+    <div class="form-group">
+      <label>State</label>
+      <select id="stateSelect">
+        <option value="">Select state...</option>
+        <option>Selangor</option><option>Kuala Lumpur</option><option>Johor</option>
+        <option>Penang</option><option>Perak</option><option>Sabah</option><option>Sarawak</option>
+        <option>Kedah</option><option>Kelantan</option><option>Melaka</option>
+        <option>Negeri Sembilan</option><option>Pahang</option><option>Perlis</option>
+        <option>Terengganu</option><option>Putrajaya</option><option>Labuan</option>
+      </select>
+    </div>
+    <label style="font-size:0.78rem;font-weight:700;color:var(--blue-dark);display:block;margin-bottom:0.4rem;">Documents</label>
+    <div class="upload-zone" onclick="document.getElementById('fileUpload').click()">
+      <div class="upload-icon">📂</div>
+      <p><strong>Click to upload</strong> or drag &amp; drop</p>
+      <p>Geran, SPA, IC — PDF or image, max 10 MB each</p>
+      <input type="file" id="fileUpload" multiple accept=".pdf,image/*" onchange="showFiles('fileUpload','fileList')" />
+    </div>
+    <div class="file-list" id="fileList"></div>
+
+    <!-- Wallet section only for DIY -->
+    <div id="walletSection" style="display:none;margin-top:1.25rem;">
+      <div class="network-badge"><div class="dot"></div> Polygon Network required</div>
+      <div class="wallet-box" id="walletBox">
+        <div class="fox">🦊</div>
+        <h4>Connect your MetaMask wallet</h4>
+        <p>Your NFT will be sent to this wallet once your title deed is verified.</p>
+        <button class="btn-primary" style="max-width:220px;margin:0 auto;" onclick="connectWallet()">Connect MetaMask</button>
+      </div>
+      <div class="wallet-ok" id="walletOK" style="display:none;">
+        <div>✅ <strong>Wallet Connected</strong></div>
+        <div class="wok-addr" id="walletAddr"></div>
+      </div>
+    </div>
+    <button class="btn-primary" style="margin-top:1.25rem;" onclick="submitDocs()">Continue to Plan Selection</button>
+  </div>
+
+  <!-- ── Step 4: Choose plan ── -->
+  <div class="modal-step" id="stepPlan">
+    <button class="modal-back" onclick="show('stepDocs');setProgress(3);">&#8592; Back</button>
+    <h2>Choose your plan</h2>
+    <p class="modal-sub">Select the subscription that fits you. Payment is processed securely via WooCommerce.</p>
+    <div class="plans-grid">
+      <div class="plan-card" onclick="selectPlan(this,'owner')">
+        <div class="plan-name">Direct Owner</div>
+        <div class="plan-price">RM 99<small>/year</small></div>
+        <div class="plan-listings">1 property</div>
+        <ul class="plan-features">
+          <li>1 NFT certificate</li>
+          <li>Ownership Verified badge</li>
+          <li>1 listing slot</li>
+          <li>Email support</li>
+        </ul>
+      </div>
+      <div class="plan-card popular" onclick="selectPlan(this,'starter')">
+        <div class="plan-name">Agent Starter</div>
+        <div class="plan-price">RM 299<small>/year</small></div>
+        <div class="plan-listings">Up to 5 listings</div>
+        <ul class="plan-features">
+          <li>5 NFT certificates</li>
+          <li>Ownership Verified badge</li>
+          <li>5 listing slots</li>
+          <li>Priority support</li>
+          <li>Agent profile page</li>
+        </ul>
+      </div>
+      <div class="plan-card" onclick="selectPlan(this,'pro')">
+        <div class="plan-name">Agent Pro</div>
+        <div class="plan-price">RM 799<small>/year</small></div>
+        <div class="plan-listings">Unlimited listings</div>
+        <ul class="plan-features">
+          <li>Unlimited NFT certificates</li>
+          <li>Ownership Verified badge</li>
+          <li>Unlimited listing slots</li>
+          <li>Dedicated account manager</li>
+          <li>Featured listings</li>
+          <li>Analytics dashboard</li>
+        </ul>
+      </div>
+    </div>
+    <div class="notice">💳 Payment is handled securely by WooCommerce. Documents are processed after payment confirmation.</div>
+    <button class="btn-primary" id="payBtn" onclick="submitPayment()" disabled>Select a plan to continue</button>
+  </div>
+
+  <!-- ── Step 4: NFT in review — Step 5 unlocks when listing is published ── -->
+  <div class="modal-step" id="stepSuccess">
+    <div class="success-box">
+      <div class="check">🏆</div>
+      <h3>Verification submitted!</h3>
+      <p>Your title deed is under review. Once approved, your Property Ownership NFT will be minted on Polygon and sent to your wallet.</p>
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:0.3rem;">Reference: <strong id="refId"></strong></div>
+      <div id="walletConfirm" style="font-family:monospace;font-size:0.75rem;color:var(--muted);margin-bottom:1.25rem;"></div>
+
+      <div class="listing-banner">
+        <div>
+          <strong>🔒 Listing unlocks after NFT is minted</strong>
+          <p>Once our team verifies your title deed and mints your <strong style="color:var(--green-light);">Ownership Verified</strong> NFT, you'll receive an email — then return here to post your listing with the badge.</p>
+          <p style="margin-top:0.5rem;font-size:0.78rem;opacity:0.7;">Verification takes 1–3 business days.</p>
+        </div>
+        <button class="btn-listing" disabled style="opacity:0.45;cursor:not-allowed;" title="Available once your NFT is minted" id="addListingBtn">Add Your Listing</button>
+      </div>
+      <button class="btn-outline" style="margin-top:1rem;" onclick="closeModal()">Done</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+
+<script>
+/* ════════════════════════════════════════════════════
+   SECURITY CONSTANTS  (update before mainnet launch)
+   ════════════════════════════════════════════════════ */
+const CONTRACT_ADDRESS  = '0xB4909E3f598CFceBb6d00dCE1e12737B2bDd73F1'; // Sepolia testnet — replace with Polygon mainnet address before launch
+const POLYGON_CHAIN_ID  = '0xaa36a7';  // 11155111 — Sepolia testnet (swap to 0x89 for Polygon Mainnet)
+const AMOY_CHAIN_ID     = '0x13882';   // 80002 — Polygon Amoy testnet
+const ALLOWED_PLANS     = new Set(['owner', 'starter', 'pro']);
+const STELLARISE_CHECKOUT = 'https://stellarise.io/checkout/';
+const STELLARISE_LISTING  = 'https://stellarise.io/add-listing/';
+
+/* ── Validation patterns ── */
+const EMAIL_RE  = /^[a-zA-Z0-9._%+\-]{1,64}@[a-zA-Z0-9.\-]{1,255}\.[a-zA-Z]{2,}$/;
+const ETH_RE    = /^0x[0-9a-fA-F]{40}$/;
+const TITLE_RE  = /^[A-Za-z0-9\s\(\)\-,\.]{1,120}$/; // no forward-slash — blocks path traversal
+const NAME_RE   = /^[\p{L}\s'\-]{1,80}$/u;
+
+/* ── XSS-safe text helper ── */
+function safeText(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML; // entities-escaped, safe for textContent insertion only
+}
+function setText(id, str) {
+  document.getElementById(id).textContent = String(str);
+}
+
+/* ── Never write sensitive data to storage ── */
+function secureStore() { /* intentionally empty — no localStorage/sessionStorage writes */ }
+
+/* ── Countries ── */
+const COUNTRIES = ["Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo (Brazzaville)","Congo (Kinshasa)","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+
+const cSel = document.getElementById('countrySelect');
+COUNTRIES.forEach(c => {
+  const o = document.createElement('option');
+  o.value = c; o.textContent = c; // textContent — XSS-safe
+  if (c === 'Malaysia') o.selected = true;
+  cSel.appendChild(o);
+});
+
+/* ── State ── */
+let currentPath    = null;
+let walletAddress  = null;
+let userEmail      = '';
+let selectedPlan   = null;
+let submitting     = false; // double-submit guard
+
+/* ── Modal ── */
+function openModal() {
+  document.getElementById('overlay').classList.add('open');
+  show('stepChoose'); setProgress(0);
+}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+function closeOnBackdrop(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
+function show(id) {
+  document.querySelectorAll('.modal-step').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ── Progress ── */
+function setProgress(activeIdx) {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('ps' + i);
+    el.classList.remove('active', 'done');
+    if (i < activeIdx)       el.classList.add('done');
+    else if (i === activeIdx) el.classList.add('active');
+  }
+}
+
+/* ── Path ── */
+function choosePath(path) {
+  currentPath = path;
+  document.getElementById('walletSection').style.display = path === 'diy' ? 'block' : 'none';
+  show('stepAccount'); setProgress(1);
+}
+
+/* ── Account — validated ── */
+function submitAccount() {
+  const first = document.getElementById('firstName').value.trim();
+  const last  = document.getElementById('lastName').value.trim();
+  const email = document.getElementById('emailInput').value.trim();
+  const dialCode  = document.getElementById('phoneCountry').value;
+  const phoneLocal = document.getElementById('phoneInput').value.trim().replace(/^0+/, '');
+  const phone = dialCode + phoneLocal;
+  const pass  = document.getElementById('passwordInput').value;
+
+  if (!NAME_RE.test(first))   { alert('Please enter a valid first name (letters only, max 80 chars).'); return; }
+  if (!EMAIL_RE.test(email))  { alert('Please enter a valid email address.'); return; }
+  if (pass.length < 8)        { alert('Password must be at least 8 characters.'); return; }
+
+  userEmail = email; // store sanitised value only — never written to localStorage
+  show('stepValuation'); setProgress(2);
+}
+
+/* ── Wallet — with chain verification ── */
+async function connectWallet() {
+  if (typeof window.ethereum === 'undefined') {
+    alert('MetaMask not found. Please install the MetaMask browser extension and try again.');
+    return;
+  }
+  const btn = document.querySelector('#walletBox .btn-primary');
+  btn.disabled = true; btn.textContent = 'Connecting…';
+  try {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const addr = accounts[0];
+
+    // Validate address format (guard against injected/tampered wallet)
+    if (!ETH_RE.test(addr)) {
+      alert('Invalid wallet address returned by MetaMask. Please try again.');
+      btn.disabled = false; btn.textContent = 'Connect MetaMask'; return;
+    }
+
+    // Switch to / add Polygon Mainnet
+    try {
+      await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: POLYGON_CHAIN_ID }] });
+    } catch (sw) {
+      if (sw.code === 4902) {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{ chainId: POLYGON_CHAIN_ID, chainName: 'Polygon Mainnet',
+            nativeCurrency: { name:'MATIC', symbol:'MATIC', decimals:18 },
+            rpcUrls: ['https://polygon-rpc.com/'],
+            blockExplorerUrls: ['https://polygonscan.com/'] }]
+        });
+      } else { throw sw; }
+    }
+
+    // Verify chain ID after switch (MITM guard)
+    const confirmedChain = await window.ethereum.request({ method: 'eth_chainId' });
+    if (confirmedChain !== POLYGON_CHAIN_ID) {
+      alert('Network mismatch — please switch to Polygon Mainnet in MetaMask and try again.');
+      btn.disabled = false; btn.textContent = 'Connect MetaMask'; return;
+    }
+
+    walletAddress = addr;
+    document.getElementById('walletBox').style.display = 'none';
+    document.getElementById('walletOK').style.display  = 'block';
+    // textContent — never innerHTML — for wallet address display
+    setText('walletAddr', walletAddress.slice(0,6) + '...' + walletAddress.slice(-4));
+    setText('walletBtn',  walletAddress.slice(0,6) + '...' + walletAddress.slice(-4));
+    document.getElementById('walletBtn').classList.add('connected');
+  } catch(e) {
+    alert('Connection cancelled or failed. Please try again.');
+    btn.disabled = false; btn.textContent = 'Connect MetaMask';
+  }
+}
+
+/* ── Docs — validated ── */
+function submitDocs() {
+  const title = document.getElementById('titleNum').value.trim();
+  const state = document.getElementById('stateSelect').value;
+
+  if (!title)           { alert('Please enter your property title number.'); return; }
+  if (!TITLE_RE.test(title)) { alert('Title number contains invalid characters.'); return; }
+  if (!state)           { alert('Please select your state.'); return; }
+  if (currentPath === 'diy' && !walletAddress) {
+    alert('Please connect your MetaMask wallet to continue.'); return;
+  }
+
+  // DIY path: show transaction preview before proceeding
+  if (currentPath === 'diy') {
+    const ok = confirm(
+      '— Transaction Preview —\n\n' +
+      'Action:    Mint Property Ownership NFT\n' +
+      'Network:   Polygon Mainnet (Chain 137)\n' +
+      'Contract:  ' + (CONTRACT_ADDRESS || '[to be set before launch]') + '\n' +
+      'Wallet:    ' + walletAddress + '\n' +
+      'Title:     ' + title + '\n\n' +
+      'Confirm you want to proceed?'
+    );
+    if (!ok) return;
+  }
+  show('stepPlan'); setProgress(4);
+}
+
+/* ── Plan — whitelist validated ── */
+function selectPlan(card, plan) {
+  if (!ALLOWED_PLANS.has(plan)) { console.error('Invalid plan:', plan); return; } // whitelist guard
+  document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedPlan = plan;
+  const btn = document.getElementById('payBtn');
+  btn.disabled = false;
+  const labels = { owner:'Direct Owner — RM 99/yr', starter:'Agent Starter — RM 299/yr', pro:'Agent Pro — RM 799/yr' };
+  btn.textContent = 'Pay & Continue: ' + labels[plan];
+}
+
+/* ── Payment — double-submit guard ── */
+function submitPayment() {
+  if (!selectedPlan || !ALLOWED_PLANS.has(selectedPlan)) return;
+  if (submitting) return; // prevent double-submit
+  submitting = true;
+
+  const btn = document.getElementById('payBtn');
+  btn.disabled = true; btn.textContent = 'Processing…';
+
+  // Confirm before payment redirect (irreversible action warning)
+  const labels = { owner:'RM 99/yr', starter:'RM 299/yr', pro:'RM 799/yr' };
+  const ok = confirm(
+    'You are about to be redirected to the secure Stellarise payment page.\n\n' +
+    'Plan: ' + selectedPlan + ' (' + labels[selectedPlan] + ')\n\n' +
+    'Continue to payment?'
+  );
+  if (!ok) {
+    submitting = false; btn.disabled = false;
+    btn.textContent = 'Pay & Continue: ' + labels[selectedPlan];
+    return;
+  }
+
+  // Generate reference first, then show success
+  const ref = 'STL-' + Date.now().toString(36).toUpperCase();
+  setText('refId', ref);
+  if (walletAddress) {
+    setText('walletConfirm', 'NFT destination: ' + walletAddress.slice(0,6) + '...' + walletAddress.slice(-4));
+  }
+  show('stepSuccess'); setProgress(5);
+  submitting = false;
+
+  // Production: redirect to WooCommerce checkout
+  // const url = new URL(STELLARISE_CHECKOUT);
+  // url.searchParams.set('plan', selectedPlan); // safe — no string concatenation
+  // url.searchParams.set('ref', ref);
+  // window.location.href = url.toString();
+}
+
+/* ── Listing redirect — called when NFT is confirmed and user clicks Add Listing ── */
+function goListing() {
+  setProgress(5);
+  // Production: window.location.href = STELLARISE_LISTING;
+  alert('Redirecting to your Stellarise listing dashboard…');
+}
+
+/* ── Files — XSS-safe DOM insertion (no innerHTML with user data) ── */
+function showFiles(inputId, listId) {
+  const files = document.getElementById(inputId).files;
+  const list  = document.getElementById(listId);
+  list.textContent = ''; // clear safely
+  for (const f of files) {
+    const div  = document.createElement('div');
+    const name = document.createElement('span');
+    const size = document.createElement('span');
+    name.textContent = '✓ ' + f.name;          // safe — textContent
+    size.textContent = ' (' + (f.size/1024).toFixed(0) + ' KB)';
+    div.appendChild(name); div.appendChild(size);
+    list.appendChild(div);
+  }
+}
+
+/* ── Step 2: Valuation ── */
+const VALUATION_API = 'https://valuation.stellarise.io/api/valuation/estimate';
+
+async function runValuation() {
+  const type    = document.getElementById('val-type').value;
+  const tenure  = document.getElementById('val-tenure').value;
+  const address = document.getElementById('val-address').value.trim();
+  const postcode= document.getElementById('val-postcode').value.trim();
+  const state   = document.getElementById('val-state').value;
+  const sqftRaw = document.getElementById('val-sqft').value.replace(/,/g, '').trim();
+  const sqft    = parseInt(sqftRaw, 10);
+
+  if (!type)    { alert('Please select a Property Type.'); return; }
+  if (!tenure)  { alert('Please select Tenure.'); return; }
+  if (!address) { alert('Please enter the Address.'); return; }
+  if (!postcode){ alert('Please enter the Postcode.'); return; }
+  if (!state)   { alert('Please select a State.'); return; }
+  if (!sqft || sqft < 100) { alert('Please enter a valid Built-up Area (min 100 sq ft).'); return; }
+
+  const btn = document.getElementById('val-btn');
+  btn.disabled = true; btn.textContent = 'Estimating…';
+  document.getElementById('val-result').style.display = 'none';
+
+  try {
+    const res = await fetch(VALUATION_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        propertyType:  type,
+        tenure:        tenure,
+        projectName:   document.getElementById('val-project').value.trim() || null,
+        address:       address,
+        postcode:      postcode,
+        state:         state,
+        builtUpSqft:   sqft,
+        bedrooms:      parseInt(document.getElementById('val-beds').value) || null,
+      })
+    });
+    const r = await res.json();
+    showValResult(r);
+    // Store for reference in docs step
+    window._valuationResult = r;
+    window._propertyData    = { type, tenure, address, postcode, state, sqft };
+  } catch(e) {
+    alert('Unable to reach valuation service. Please try again or skip.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Get Instant Estimate →';
+  }
+}
+
+function fmt(n) { return 'RM ' + Number(n).toLocaleString('en-MY'); }
+
+function showValResult(r) {
+  const box     = document.getElementById('val-estimate-box');
+  const nodata  = document.getElementById('val-nodata');
+  const result  = document.getElementById('val-result');
+
+  if (r.marketValue) {
+    box.style.display = 'block';
+    nodata.style.display = 'none';
+    document.getElementById('val-range').textContent =
+      fmt(r.marketValue.low) + ' — ' + fmt(r.marketValue.high);
+    document.getElementById('val-mid-label').textContent =
+      'Mid estimate: ' + fmt(r.marketValue.mid) +
+      '  ·  ' + (r.pricingBasis?.compCount || 0) + ' comparable transactions';
+    const band = r.confidence?.band || '';
+    const bandLabel = { high: '🟢 High confidence', medium: '🟡 Medium confidence', low: '🔴 Low confidence' }[band] || '';
+    document.getElementById('val-reasons').textContent =
+      bandLabel + (r.confidence?.reasons?.[0] ? '  ·  ' + r.confidence.reasons[0] : '');
+  } else {
+    box.style.display = 'none';
+    nodata.style.display = 'block';
+    nodata.textContent = '⚠️ Not enough comparable data for this area. You can still proceed — our team will assess your property during verification.';
+  }
+  result.style.display = 'block';
+}
+
+function proceedToDocs() { show('stepDocs'); setProgress(3); }
+function skipValuation()  { show('stepDocs'); setProgress(3); }
+
+/* ── localStorage hygiene check (runs once on load) ── */
+(function auditStorage() {
+  const sensitive = ['wallet','address','email','password','key','token','private'];
+  sensitive.forEach(k => {
+    if (localStorage.getItem(k)) {
+      console.warn('[Security] Unexpected sensitive key in localStorage:', k);
+      localStorage.removeItem(k);
+    }
+  });
+})();
+</script>
+</body>
+</html>

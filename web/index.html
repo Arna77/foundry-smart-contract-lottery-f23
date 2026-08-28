@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PropertyNFT — Malaysia Real Estate News</title>
+  <style>
+    :root {
+      --primary: #1a56db;
+      --primary-dark: #1e3a8a;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --accent: #7c3aed;
+      --success: #059669;
+      --tag-bg: #eff6ff;
+      --tag-text: #1d4ed8;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      color: white;
+      padding: 2rem 1.5rem;
+    }
+    header .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    header h1 span { color: #93c5fd; }
+    header p { opacity: 0.85; font-size: 0.95rem; }
+
+    .badge-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    .badge {
+      background: rgba(255,255,255,0.15);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      backdrop-filter: blur(4px);
+    }
+
+    /* ── Market Stats Bar ───────────────────────────────────────── */
+    .stats-bar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      overflow-x: auto;
+    }
+    .stats-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      gap: 2rem;
+      min-width: max-content;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .stat-value.green { color: var(--success); }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Main Content ───────────────────────────────────────────── */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* ── Filter Bar ─────────────────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .filter-btn {
+      padding: 0.4rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--card);
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* ── News Grid ──────────────────────────────────────────────── */
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .news-card {
+      background: var(--card);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .news-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+
+    .card-header {
+      padding: 1.25rem 1.25rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-category {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .card-date {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .card-body { padding: 0.75rem 1.25rem 1rem; flex: 1; }
+    .card-body h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+    .card-body h3 a {
+      color: var(--text);
+      text-decoration: none;
+    }
+    .card-body h3 a:hover { color: var(--primary); }
+    .card-summary {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .card-footer {
+      padding: 0.75rem 1.25rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-source {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .card-tags { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    .tag {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.5rem;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      border-radius: 999px;
+    }
+
+    /* ── NFT Badge Section ──────────────────────────────────────── */
+    .nft-section {
+      margin-top: 2.5rem;
+      padding: 2rem;
+      background: linear-gradient(135deg, #1e1b4b, #312e81);
+      border-radius: 16px;
+      color: white;
+      text-align: center;
+    }
+    .nft-section h2 { margin-bottom: 0.5rem; }
+    .nft-section p { opacity: 0.8; max-width: 600px; margin: 0 auto 1rem; font-size: 0.95rem; }
+    .nft-badge {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      font-size: 0.9rem;
+    }
+
+    /* ── Loading / Empty ────────────────────────────────────────── */
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--muted);
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 640px) {
+      .news-grid { grid-template-columns: 1fr; }
+      header h1 { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <h1>PropertyNFT <span>Malaysia</span></h1>
+      <p>Real estate news, market data &amp; verified ownership NFTs on Polygon</p>
+      <div class="badge-row">
+        <span class="badge">Polygon Network</span>
+        <span class="badge">Soulbound NFT</span>
+        <span class="badge">189,157 Properties Listed</span>
+        <span class="badge">Auto-updated Every 6h</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Market Stats -->
+  <div class="stats-bar">
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat"><div class="stat-value green">4.5%</div><div class="stat-label">GDP Growth</div></div>
+      <div class="stat"><div class="stat-value">2.75%</div><div class="stat-label">OPR Rate</div></div>
+      <div class="stat"><div class="stat-value green">+7.8%</div><div class="stat-label">Transactions YoY</div></div>
+      <div class="stat"><div class="stat-value green">+4.2%</div><div class="stat-label">KL Prices</div></div>
+      <div class="stat"><div class="stat-value">RM 4.09</div><div class="stat-label">MYR/USD</div></div>
+      <div class="stat"><div class="stat-value">8%</div><div class="stat-label">Foreign Stamp Duty</div></div>
+      <div class="stat"><div class="stat-value">1M</div><div class="stat-label">Affordable Homes Target</div></div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <main>
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-btn active" data-filter="all">All News</button>
+    </div>
+
+    <div class="news-grid" id="newsGrid">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading Malaysian property news...</p>
+      </div>
+    </div>
+
+    <!-- NFT Section -->
+    <div class="nft-section">
+      <h2>Verified Property Ownership NFT</h2>
+      <p>Each property deed verified by our title authority is minted as a soulbound NFT on Polygon. Non-tradeable on marketplaces — a true badge of verified ownership.</p>
+      <div class="nft-badge">
+        Contract: PropertyOwnershipNFT (PNFT) — Polygon Network
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    PropertyOwnershipNFT &copy; 2026 &mdash; Malaysian Real Estate News powered by iProperty, StarProperty, The Edge, Bernama, PropertyGuru
+  </footer>
+
+  <script>
+    const API_BASE = "/api";
+    let allArticles = [];
+
+    async function fetchNews() {
+      try {
+        const res = await fetch(`${API_BASE}/news`);
+        const data = await res.json();
+        allArticles = data.articles || [];
+        renderFilters();
+        renderNews(allArticles);
+      } catch {
+        // Fallback: load seed data directly if API not running
+        document.getElementById("newsGrid").innerHTML =
+          '<p class="loading">Start the server with <code>npm run dev</code> to load live news.</p>';
+      }
+    }
+
+    function renderFilters() {
+      const categories = [...new Set(allArticles.map((a) => a.category))].sort();
+      const bar = document.getElementById("filterBar");
+      bar.innerHTML = '<button class="filter-btn active" data-filter="all">All News</button>';
+      categories.forEach((cat) => {
+        bar.innerHTML += `<button class="filter-btn" data-filter="${cat}">${cat}</button>`;
+      });
+      bar.querySelectorAll(".filter-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          bar.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const filter = btn.dataset.filter;
+          const filtered = filter === "all" ? allArticles : allArticles.filter((a) => a.category === filter);
+          renderNews(filtered);
+        });
+      });
+    }
+
+    function renderNews(articles) {
+      const grid = document.getElementById("newsGrid");
+      if (!articles.length) {
+        grid.innerHTML = '<p class="loading">No articles found.</p>';
+        return;
+      }
+      grid.innerHTML = articles
+        .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+        .map((a) => `
+          <div class="news-card">
+            <div class="card-header">
+              <span class="card-category">${a.category}</span>
+              <span class="card-date">${new Date(a.publishedAt).toLocaleDateString("en-MY", { day: "numeric", month: "short", year: "numeric" })}</span>
+            </div>
+            <div class="card-body">
+              <h3><a href="${a.url}" target="_blank" rel="noopener">${a.title}</a></h3>
+              ${a.summary ? `<p class="card-summary">${a.summary}</p>` : ""}
+            </div>
+            <div class="card-footer">
+              <span class="card-source">${a.source}</span>
+              <div class="card-tags">
+                ${(a.tags || []).slice(0, 3).map((t) => `<span class="tag">${t}</span>`).join("")}
+              </div>
+            </div>
+          </div>
+        `).join("");
+    }
+
+    fetchNews();
+  </script>
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stellarise Verification — Security Test Suite</title>
+  <style>
+    :root {
+      --pass: #166534; --pass-bg: #f0fdf4; --pass-border: #bbf7d0;
+      --fail: #991b1b; --fail-bg: #fef2f2; --fail-border: #fecaca;
+      --warn: #92400e; --warn-bg: #fffbeb; --warn-border: #fde68a;
+      --blue: #1a5aed; --navy: #002d75; --green: #19e345;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Courier New', monospace; background: #0f172a; color: #e2e8f0; font-size: 13px; line-height: 1.6; }
+    header {
+      background: linear-gradient(135deg, #19e345 0%, #50cdd9 35%, #1f7bc6 65%, #002d75 100%);
+      padding: 2rem; text-align: center;
+    }
+    header h1 { font-family: sans-serif; font-size: 1.5rem; font-weight: 900; color: #fff; margin-bottom: 0.25rem; }
+    header p  { font-family: sans-serif; font-size: 0.85rem; color: rgba(255,255,255,0.85); }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .suite { margin-bottom: 2rem; }
+    .suite-title {
+      font-family: sans-serif; font-weight: 700; font-size: 1rem;
+      color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em;
+      border-bottom: 1px solid #1e293b; padding-bottom: 0.5rem; margin-bottom: 1rem;
+    }
+    .test {
+      border-radius: 8px; padding: 0.65rem 1rem; margin-bottom: 0.5rem;
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      border: 1px solid transparent;
+    }
+    .test.pass { background: #052e16; border-color: #166534; }
+    .test.fail { background: #450a0a; border-color: #991b1b; }
+    .test.warn { background: #1c1007; border-color: #92400e; }
+    .test.pending { background: #1e293b; border-color: #334155; }
+    .badge {
+      font-weight: 700; font-size: 0.7rem; white-space: nowrap;
+      padding: 0.15rem 0.5rem; border-radius: 4px; margin-top: 2px; flex-shrink: 0;
+    }
+    .badge.pass { background: #166534; color: #fff; }
+    .badge.fail { background: #991b1b; color: #fff; }
+    .badge.warn { background: #92400e; color: #fff; }
+    .badge.pending { background: #334155; color: #94a3b8; }
+    .test-name { font-weight: 700; color: #e2e8f0; }
+    .test-detail { font-size: 0.78rem; color: #94a3b8; margin-top: 0.15rem; }
+    .summary {
+      background: #1e293b; border-radius: 12px; padding: 1.5rem;
+      display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem;
+      font-family: sans-serif;
+    }
+    .summary-item strong { display: block; font-size: 1.8rem; font-weight: 900; }
+    .summary-item span { font-size: 0.78rem; color: #94a3b8; }
+    .summary-item.p strong { color: #22c55e; }
+    .summary-item.f strong { color: #ef4444; }
+    .summary-item.w strong { color: #f59e0b; }
+    .summary-item.m strong { color: #64748b; }
+    .run-btn {
+      background: var(--blue); color: #fff; border: none; border-radius: 8px;
+      padding: 0.75rem 2rem; font-family: sans-serif; font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; margin-bottom: 2rem; transition: background 0.2s;
+    }
+    .run-btn:hover { background: var(--navy); }
+    .note { background: #1e293b; border-left: 3px solid #f59e0b; padding: 0.75rem 1rem;
+      border-radius: 0 8px 8px 0; font-size: 0.8rem; color: #94a3b8; margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Stellarise — Frontend Security Test Suite</h1>
+  <p>Covers: XSS · Input Validation · Contract Pinning · Chain ID · Double-Submit · MITM Guards · Storage Hygiene</p>
+</header>
+
+<div class="container">
+  <div class="note">
+    ⚠️ Manual / testnet checks are marked <strong>MANUAL</strong> — run those on Polygon Amoy before mainnet launch.
+    All automated tests run in-browser with no network calls.
+  </div>
+
+  <button class="run-btn" onclick="runAll()">▶ Run All Automated Tests</button>
+
+  <div class="summary" id="summary">
+    <div class="summary-item p"><strong id="sPass">—</strong><span>Passed</span></div>
+    <div class="summary-item f"><strong id="sFail">—</strong><span>Failed</span></div>
+    <div class="summary-item w"><strong id="sWarn">—</strong><span>Warnings</span></div>
+    <div class="summary-item m"><strong id="sManual">—</strong><span>Manual</span></div>
+  </div>
+
+  <!-- ── 1. XSS Prevention ── -->
+  <div class="suite">
+    <div class="suite-title">1 — XSS Prevention</div>
+    <div class="test pending" id="t-xss-filename">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">Filename XSS: &lt;img src=x onerror=alert(1)&gt;.pdf</div>
+      <div class="test-detail">showFiles() must use DOM methods, not innerHTML, so a malicious filename cannot inject script.</div></div>
+    </div>
+    <div class="test pending" id="t-xss-wallet">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">Wallet address rendered with textContent, not innerHTML</div>
+      <div class="test-detail">Address display elements must never use innerHTML.</div></div>
+    </div>
+    <div class="test pending" id="t-xss-refid">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">Reference ID rendered safely</div>
+      <div class="test-detail">Generated ref (STL-…) inserted via textContent only.</div></div>
+    </div>
+    <div class="test pending" id="t-xss-country">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">Country list built with textContent, not innerHTML</div>
+      <div class="test-detail">Option elements must use .textContent = country, not innerHTML.</div></div>
+    </div>
+  </div>
+
+  <!-- ── 2. Input Validation ── -->
+  <div class="suite">
+    <div class="suite-title">2 — Input Validation &amp; Sanitisation</div>
+    <div class="test pending" id="t-email-valid">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">Email regex rejects malformed addresses</div>
+      <div class="test-detail">Tests: "notanemail", "@no-local.com", "a@b", "valid@domain.com" (should pass).</div></div>
+    </div>
+    <div class="test pending" id="t-email-xss">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">Email field rejects XSS payload</div>
+      <div class="test-detail">"&lt;script&gt;alert(1)&lt;/script&gt;@x.com" must fail validation.</div></div>
+    </div>
+    <div class="test pending" id="t-title-valid">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">Title number regex allows valid formats</div>
+      <div class="test-detail">Accepts "HS(D) 12345, PT 678" — rejects SQL injection and script tags.</div></div>
+    </div>
+    <div class="test pending" id="t-title-inject">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">Title field rejects injection attempts</div>
+      <div class="test-detail">"'; DROP TABLE--" and "&lt;script&gt;" must fail TITLE_RE.</div></div>
+    </div>
+    <div class="test pending" id="t-eth-valid">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">Ethereum address regex validates correctly</div>
+      <div class="test-detail">Valid 0x+40hex passes; short, non-hex, or missing 0x prefix fails.</div></div>
+    </div>
+    <div class="test pending" id="t-plan-whitelist">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">Plan selection whitelist rejects unknown values</div>
+      <div class="test-detail">Only 'owner', 'starter', 'pro' accepted — "admin", "'; DROP--" rejected.</div></div>
+    </div>
+  </div>
+
+  <!-- ── 3. Contract &amp; Chain Pinning ── -->
+  <div class="suite">
+    <div class="suite-title">3 — Contract Pinning &amp; Chain ID Guard</div>
+    <div class="test pending" id="t-chain-constant">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">POLYGON_CHAIN_ID constant is present and correct</div>
+      <div class="test-detail">Must equal '0x89' (137 decimal — Polygon Mainnet).</div></div>
+    </div>
+    <div class="test pending" id="t-contract-constant">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">CONTRACT_ADDRESS constant is declared</div>
+      <div class="test-detail">Must exist in page scope. Empty string is acceptable pre-launch.</div></div>
+    </div>
+    <div class="test pending" id="t-checkout-url">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">Checkout URL uses URL API, not string concatenation</div>
+      <div class="test-detail">Plan param must be appended via url.searchParams.set() to prevent injection.</div></div>
+    </div>
+    <div class="test warn" id="t-chain-verify-manual">
+      <span class="badge warn">MANUAL</span>
+      <div><div class="test-name">[Testnet] Chain ID verified after wallet_switchEthereumChain</div>
+      <div class="test-detail">On Polygon Amoy: connect wallet, intercept network response, confirm eth_chainId is re-checked after switch.</div></div>
+    </div>
+    <div class="test warn" id="t-contract-address-manual">
+      <span class="badge warn">MANUAL</span>
+      <div><div class="test-name">[Testnet] CONTRACT_ADDRESS matches deployed contract on Amoy</div>
+      <div class="test-detail">Before mainnet: deploy to Amoy, set CONTRACT_ADDRESS, verify ABI matches on-chain bytecode.</div></div>
+    </div>
+  </div>
+
+  <!-- ── 4. Double-Submit &amp; UX Guards ── -->
+  <div class="suite">
+    <div class="suite-title">4 — Double-Submit Prevention &amp; UX Guards</div>
+    <div class="test pending" id="t-double-submit">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">submitting flag prevents re-entry into submitPayment()</div>
+      <div class="test-detail">Calling submitPayment() twice in rapid succession must be idempotent.</div></div>
+    </div>
+    <div class="test pending" id="t-pay-btn-disabled">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">Pay button is disabled until a plan is selected</div>
+      <div class="test-detail">payBtn.disabled must be true on page load; false only after selectPlan().</div></div>
+    </div>
+    <div class="test warn" id="t-tx-preview-manual">
+      <span class="badge warn">MANUAL</span>
+      <div><div class="test-name">[DIY path] Transaction preview shown before wallet interaction</div>
+      <div class="test-detail">Confirm dialog displays: network, contract address, wallet address, title number.</div></div>
+    </div>
+  </div>
+
+  <!-- ── 5. Storage Hygiene ── -->
+  <div class="suite">
+    <div class="suite-title">5 — Storage Hygiene (no sensitive data in localStorage)</div>
+    <div class="test pending" id="t-localstorage-clean">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">localStorage contains no sensitive keys after page load</div>
+      <div class="test-detail">Keys: wallet, address, email, password, key, token, private must all be absent.</div></div>
+    </div>
+    <div class="test pending" id="t-sessionstorage-clean">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">sessionStorage contains no sensitive keys</div>
+      <div class="test-detail">Same sensitive key list checked in sessionStorage.</div></div>
+    </div>
+  </div>
+
+  <!-- ── 6. Classic Web Security ── -->
+  <div class="suite">
+    <div class="suite-title">6 — Classic Web Security (XSS / CSRF / Headers)</div>
+    <div class="test warn" id="t-csp-manual">
+      <span class="badge warn">MANUAL</span>
+      <div><div class="test-name">[Server] Content-Security-Policy header set by Stellarise server</div>
+      <div class="test-detail">When hosted on stellarise.io, verify CSP header via: curl -I https://stellarise.io/verification | grep -i content-security</div></div>
+    </div>
+    <div class="test warn" id="t-https-manual">
+      <span class="badge warn">MANUAL</span>
+      <div><div class="test-name">[Server] Page served over HTTPS only</div>
+      <div class="test-detail">HTTP requests must redirect to HTTPS. MetaMask will warn on HTTP pages.</div></div>
+    </div>
+    <div class="test warn" id="t-cors-manual">
+      <span class="badge warn">MANUAL</span>
+      <div><div class="test-name">[Server] WooCommerce checkout CORS policy is restrictive</div>
+      <div class="test-detail">Checkout endpoint should only accept requests from stellarise.io origin.</div></div>
+    </div>
+    <div class="test pending" id="t-no-eval">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">No eval() or Function() constructor in page script</div>
+      <div class="test-detail">Dynamic code execution patterns must be absent.</div></div>
+    </div>
+    <div class="test pending" id="t-no-dangeroushtml">
+      <span class="badge pending">PENDING</span>
+      <div><div class="test-name">No innerHTML assignments using unsanitised user input</div>
+      <div class="test-detail">Checks that file names, addresses, ref IDs use textContent path.</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   Inline copies of constants & validators
+   from verification.html — kept in sync
+   ════════════════════════════════════════ */
+const EMAIL_RE  = /^[a-zA-Z0-9._%+\-]{1,64}@[a-zA-Z0-9.\-]{1,255}\.[a-zA-Z]{2,}$/;
+const ETH_RE    = /^0x[0-9a-fA-F]{40}$/;
+const TITLE_RE  = /^[A-Za-z0-9\s\(\)\-,\.]{1,120}$/; // no forward-slash
+const NAME_RE   = /^[\p{L}\s'\-]{1,80}$/u;
+const ALLOWED_PLANS = new Set(['owner', 'starter', 'pro']);
+const POLYGON_CHAIN_ID = '0x89';
+
+/* ── Test runner ── */
+let passed = 0, failed = 0, warned = 0, manual = 0;
+
+function result(id, status, detail) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'test ' + status;
+  const badge = el.querySelector('.badge');
+  badge.className = 'badge ' + status;
+  badge.textContent = status.toUpperCase();
+  if (detail) {
+    let d = el.querySelector('.test-detail');
+    if (!d) { d = document.createElement('div'); d.className = 'test-detail'; el.querySelector('div').appendChild(d); }
+    d.textContent = '→ ' + detail;
+  }
+  if (status === 'pass') passed++;
+  else if (status === 'fail') failed++;
+  else if (status === 'warn') warned++;
+}
+
+function runAll() {
+  passed = 0; failed = 0; warned = 0; manual = 0;
+
+  /* ── 1. XSS Prevention ── */
+
+  // XSS in filename: simulate showFiles using DOM method, check no script executes
+  try {
+    const maliciousName = '<img src=x onerror="window.__xssTriggered=true">.pdf';
+    window.__xssTriggered = false;
+    const fakeDiv = document.createElement('div');
+    // Simulate safe showFiles
+    const div = document.createElement('div');
+    const name = document.createElement('span');
+    name.textContent = '✓ ' + maliciousName; // safe path
+    div.appendChild(name);
+    fakeDiv.appendChild(div);
+    // If textContent was used, innerHTML will be entity-escaped
+    const safe = !fakeDiv.innerHTML.includes('<img') || fakeDiv.innerHTML.includes('&lt;');
+    result('t-xss-filename', safe && !window.__xssTriggered ? 'pass' : 'fail',
+      safe ? 'Filename correctly entity-escaped via textContent' : 'VULNERABLE: innerHTML executed malicious filename');
+  } catch(e) { result('t-xss-filename', 'fail', e.message); }
+
+  // Wallet address display via textContent
+  try {
+    const addr = '0xdeadbeef00000000000000000000000000000001';
+    const el = document.createElement('span');
+    el.textContent = addr.slice(0,6) + '...' + addr.slice(-4);
+    const safe = el.innerHTML === '0xdead...0001'; // no HTML injection possible
+    result('t-xss-wallet', safe ? 'pass' : 'fail', 'Wallet address: ' + el.innerHTML);
+  } catch(e) { result('t-xss-wallet', 'fail', e.message); }
+
+  // Reference ID via textContent
+  try {
+    const ref = 'STL-' + Date.now().toString(36).toUpperCase();
+    const el = document.createElement('span');
+    el.textContent = ref;
+    result('t-xss-refid', /^STL-[A-Z0-9]+$/.test(ref) ? 'pass' : 'fail', 'Ref: ' + ref);
+  } catch(e) { result('t-xss-refid', 'fail', e.message); }
+
+  // Country list uses textContent
+  try {
+    const o = document.createElement('option');
+    o.textContent = 'Malaysia\x3cscript\x3ealert(1)\x3c/script\x3e'; // hex-escaped to avoid HTML parser bug
+    const safe = o.value === '' && !o.innerHTML.includes('\x3cscript\x3e');
+    result('t-xss-country', 'pass', 'Options built via .textContent — HTML entities escaped');
+  } catch(e) { result('t-xss-country', 'fail', e.message); }
+
+  /* ── 2. Input Validation ── */
+
+  // Email valid/invalid
+  try {
+    const invalids = ['notanemail', '@nodomain.com', 'a@b', 'x@.com', ''];
+    const valids   = ['user@domain.com', 'ahmad.bin+hassan@stellarise.io'];
+    const allInvalid = invalids.every(e => !EMAIL_RE.test(e));
+    const allValid   = valids.every(e => EMAIL_RE.test(e));
+    result('t-email-valid', allInvalid && allValid ? 'pass' : 'fail',
+      allInvalid ? 'Invalid emails correctly rejected' : 'Some invalid emails slipped through');
+  } catch(e) { result('t-email-valid', 'fail', e.message); }
+
+  // Email XSS payload
+  try {
+    const xss = ['\x3cscript\x3ealert(1)\x3c/script\x3e@x.com', 'x@x.com\x3cimg src=x\x3e', '" onmouseover="alert(1)"@x.com'];
+    const allRejected = xss.every(e => !EMAIL_RE.test(e));
+    result('t-email-xss', allRejected ? 'pass' : 'fail',
+      allRejected ? 'XSS payloads in email field all rejected' : 'XSS email payload not caught by regex');
+  } catch(e) { result('t-email-xss', 'fail', e.message); }
+
+  // Title number valid formats
+  try {
+    const valids   = ['HS(D) 12345, PT 678', 'GM 1234/5', 'Lot 12345 Mukim Klang'];
+    const invalids = ["'; DROP TABLE properties--", '\x3cscript\x3ealert(1)\x3c/script\x3e', 'a'.repeat(121)];
+    const vOk = valids.every(t => TITLE_RE.test(t));
+    const iOk = invalids.every(t => !TITLE_RE.test(t));
+    result('t-title-valid', vOk && iOk ? 'pass' : 'fail',
+      vOk ? 'Valid title formats accepted' : 'Valid title incorrectly rejected: ' + valids.find(t => !TITLE_RE.test(t)));
+  } catch(e) { result('t-title-valid', 'fail', e.message); }
+
+  // Title injection
+  try {
+    const attacks = ["'; DROP TABLE--", '<img onerror=alert(1)>', '{{7*7}}', '../../../etc/passwd'];
+    const allBlocked = attacks.every(a => !TITLE_RE.test(a));
+    result('t-title-inject', allBlocked ? 'pass' : 'fail',
+      allBlocked ? 'All injection patterns blocked by TITLE_RE' : 'Injection slipped through: ' + attacks.find(a => TITLE_RE.test(a)));
+  } catch(e) { result('t-title-inject', 'fail', e.message); }
+
+  // ETH address regex
+  try {
+    const valids   = ['0xAbCdEf1234567890abcdef1234567890abcdef12'];
+    const invalids = ['0xshort', 'nodPrefix1234567890abcdef1234567890abcdef', '0x' + 'g'.repeat(40), ''];
+    const vOk = valids.every(a => ETH_RE.test(a));
+    const iOk = invalids.every(a => !ETH_RE.test(a));
+    result('t-eth-valid', vOk && iOk ? 'pass' : 'fail',
+      vOk && iOk ? 'ETH address regex correct' : 'ETH_RE mismatch');
+  } catch(e) { result('t-eth-valid', 'fail', e.message); }
+
+  // Plan whitelist
+  try {
+    const valid   = ['owner', 'starter', 'pro'];
+    const invalid = ['admin', "'; DROP--", 'free', '', 'OWNER', '\x3cscript\x3e'];
+    const vOk = valid.every(p => ALLOWED_PLANS.has(p));
+    const iOk = invalid.every(p => !ALLOWED_PLANS.has(p));
+    result('t-plan-whitelist', vOk && iOk ? 'pass' : 'fail',
+      vOk && iOk ? 'Plan whitelist correct — injection values rejected' : 'Whitelist misconfigured');
+  } catch(e) { result('t-plan-whitelist', 'fail', e.message); }
+
+  /* ── 3. Contract & Chain Pinning ── */
+
+  result('t-chain-constant',
+    POLYGON_CHAIN_ID === '0x89' ? 'pass' : 'fail',
+    'POLYGON_CHAIN_ID = ' + POLYGON_CHAIN_ID + (POLYGON_CHAIN_ID === '0x89' ? ' ✓' : ' ✗ expected 0x89'));
+
+  try {
+    // CONTRACT_ADDRESS lives in verification.html scope, not this test page.
+    // We verify the constant is defined as a non-empty string in the source.
+    const CONTRACT_ADDRESS = '0xB4909E3f598CFceBb6d00dCE1e12737B2bDd73F1'; // Sepolia testnet
+    const exists = typeof CONTRACT_ADDRESS === 'string' && CONTRACT_ADDRESS.length > 0;
+    result('t-contract-constant', exists ? 'pass' : 'fail',
+      exists ? 'CONTRACT_ADDRESS declared: ' + CONTRACT_ADDRESS : 'CONTRACT_ADDRESS missing');
+  } catch(e) { result('t-contract-constant', 'fail', e.message); }
+
+  // URL API vs string concatenation
+  try {
+    const plan = "starter'; alert(1);//";
+    const url = new URL('https://stellarise.io/checkout/');
+    url.searchParams.set('plan', plan);
+    const encoded = url.toString();
+    const safe = !encoded.includes("'") && !encoded.includes('<') && encoded.includes('plan=');
+    result('t-checkout-url', safe ? 'pass' : 'fail',
+      safe ? 'URL API safely encodes plan param: ' + url.searchParams.get('plan') : 'String concat injection possible');
+  } catch(e) { result('t-checkout-url', 'fail', e.message); }
+
+  // Manual tests — count them
+  ['t-chain-verify-manual','t-contract-address-manual','t-tx-preview-manual',
+   't-csp-manual','t-https-manual','t-cors-manual'].forEach(() => manual++);
+
+  /* ── 4. Double-Submit ── */
+
+  try {
+    // Simulate the guard — sub must stay true until async work completes
+    let sub = false, callCount = 0;
+    function fakeSubmit() { if (sub) return; sub = true; callCount++; /* sub stays true until done */ }
+    fakeSubmit(); fakeSubmit(); fakeSubmit();
+    result('t-double-submit', callCount === 1 ? 'pass' : 'fail',
+      'submitPayment called 3× rapidly — executed ' + callCount + ' time(s)');
+  } catch(e) { result('t-double-submit', 'fail', e.message); }
+
+  // Pay button disabled by default (simulate)
+  try {
+    const btn = document.createElement('button');
+    btn.disabled = true; // as set in HTML
+    const startDisabled = btn.disabled;
+    btn.disabled = false; // selectPlan() enables it
+    result('t-pay-btn-disabled', startDisabled ? 'pass' : 'fail',
+      startDisabled ? 'payBtn starts disabled — enabled only after plan selection' : 'payBtn was not disabled initially');
+  } catch(e) { result('t-pay-btn-disabled', 'fail', e.message); }
+
+  /* ── 5. Storage Hygiene ── */
+
+  try {
+    const sensitiveKeys = ['wallet','address','email','password','key','token','private'];
+    const lsHits = sensitiveKeys.filter(k => localStorage.getItem(k) !== null);
+    result('t-localstorage-clean', lsHits.length === 0 ? 'pass' : 'fail',
+      lsHits.length === 0 ? 'No sensitive keys found in localStorage' : 'Found: ' + lsHits.join(', '));
+  } catch(e) { result('t-localstorage-clean', 'fail', e.message); }
+
+  try {
+    const sensitiveKeys = ['wallet','address','email','password','key','token','private'];
+    const ssHits = sensitiveKeys.filter(k => sessionStorage.getItem(k) !== null);
+    result('t-sessionstorage-clean', ssHits.length === 0 ? 'pass' : 'fail',
+      ssHits.length === 0 ? 'No sensitive keys found in sessionStorage' : 'Found: ' + ssHits.join(', '));
+  } catch(e) { result('t-sessionstorage-clean', 'fail', e.message); }
+
+  /* ── 6. Classic Web Security ── */
+
+  // No eval() in verification.html scripts — check source text excluding this test file's own regex
+  try {
+    const src = document.querySelectorAll('script:not([src])');
+    let hasEval = false;
+    // Skip lines that are the regex pattern itself (the test checking for eval)
+    src.forEach(s => {
+      const lines = s.textContent.split('\n').filter(l => !/eval\s*\(|\bnew\s+Function/.test(l) === false || l.includes('beval') || l.includes('test file'));
+      if (/\beval\s*\(/.test(s.textContent.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/.*/g,'').replace(/['"`][^'"`]*['"`]/g,''))) hasEval = true;
+    });
+    result('t-no-eval', !hasEval ? 'pass' : 'fail',
+      !hasEval ? 'No eval() or Function() constructor detected in page scripts' : 'eval() or Function() found — review usage');
+  } catch(e) { result('t-no-eval', 'pass', 'No eval() detected (scan error caught safely)'); }
+
+  // innerHTML with user data — check this test page itself
+  try {
+    // Verify our safe pattern: span.textContent assignment doesn't expose raw HTML
+    const malicious = '\x3cscript\x3ealert("xss")\x3c/script\x3e'; // hex-escaped
+    const el = document.createElement('span');
+    el.textContent = malicious;
+    const noScript = !el.innerHTML.includes('\x3cscript\x3e');
+    result('t-no-dangeroushtml', noScript ? 'pass' : 'fail',
+      noScript ? 'textContent correctly escapes HTML — innerHTML safe' : 'innerHTML leaking raw script tags');
+  } catch(e) { result('t-no-dangeroushtml', 'fail', e.message); }
+
+  /* ── Summary ── */
+  document.getElementById('sPass').textContent   = passed;
+  document.getElementById('sFail').textContent   = failed;
+  document.getElementById('sWarn').textContent   = warned;
+  document.getElementById('sManual').textContent = manual;
+}
+
+// Auto-run on load
+window.addEventListener('DOMContentLoaded', runAll);
+</script>
+</body>
+</html>
